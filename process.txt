@@ -1,0 +1,61 @@
+Direct HREF to login URLs, skip one redirect
+/login			Main login endpoint
+	List servics supported
+
+	For all services:
+		If 'service_${service}' cookie exists:
+			Check status
+
+			If 'waiting' status:
+				Set meta-refresh for the page to 5 seconds
+				Add CSS for 'pinwheel' state to icon
+				Link: Disabled
+				JavaScript:
+					Disable meta-refresh
+					AJAX to /ajax/login-status on constant loop
+
+			If 'error' status:
+				Delete cookie
+				Create 'error_${service}' cookie w/ error code
+				Add CSS for 'error' state to icon
+				Link: Leads to /errors/<service>/<error code>
+
+			If 'just added' status:
+				Delete cookie
+				Add CSS for 'new addition' state to icon
+				Mark service as a whole as 'verified' for this session
+				Link: Leads to /services/<service>/<service-specific-UID>
+
+			If 'verified' status:
+				Delete cookie
+				Add CSS for 'verified' state to icon
+				Mark service as a whole as 'verified' for this session
+				Mark service-specific-UID as 'logged in' for this session
+				Link: Leads to /services/<service>/<service-specific-UID>
+
+		If 'service_${service}' cookie does NOT exist:
+
+			If service marked 'verified' on this session:
+				If specific instance of service for account matched ssUID...
+					Add CSS for 'verified' state to icon
+					Link: Leads to /services/<service>/<service-specific-UID>
+
+		Default:
+			Add CSS for 'add/login' state to icon
+			Link: Leads to service-specific login URL
+
+/login/<service>	Return callback for each service
+
+	Set 'session' cookie if it doesn't exist
+
+	Set 'service_${service}' cookie
+
+	Set memcache value for '${session}:${service}' to 'Processing' state
+
+	Redirect client to '/login'
+
+	Begin processing request
+
+	On completion, update memcache value
+
+	If result is successful, update database
