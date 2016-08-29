@@ -1,4 +1,7 @@
-// We only use http, url, path, and fs once each, so there's no 'require' block up here
+// We only use http, url, path, and fs once each, so there's no 'require' boilerplate
+
+var secrets;
+require('./secrets.js').import(secrets);
 
 // Endpoints uses the following structure:
 //	uri: NON-REGEX uri to match against, including leading /

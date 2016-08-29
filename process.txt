@@ -1,4 +1,12 @@
 Direct HREF to login URLs, skip one redirect
+/			Main Homepage
+	If logged out:
+		Describe website
+
+	Provide links to sub-systems:
+		Login Management (link to /login)
+		Profile Management (link to /profile)
+
 /login			Main login endpoint
 	List servics supported
 
