@@ -1,7 +1,7 @@
 // We only use http, url, path, and fs once each, so there's no 'require' boilerplate
 
-var secrets;
-require('./secrets.js').import(secrets);
+var secrets = require('./secrets.js').secrets;
+var aead = require('./aead.js');
 
 // Endpoints uses the following structure:
 //	uri: NON-REGEX uri to match against, including leading /
@@ -39,14 +39,37 @@ server.on('request', (raw, res) => {
 	var tmp = require('url').parse(raw.url, true);
 	var uri = tmp.pathname;
 	var query = tmp.query;
-	delete tmp;
 
-	var cookies = '';
+	// Cookie parsing over-simplified here
+	var cookies = {};
+	var rawcookies = '';
 	if (raw.headers.hasOwnProperty('cookies')) {
-		cookies = ';' + raw.headers.cookies;
+		rawcookies = ';' + raw.headers.cookies;
 	}
-	cookies = cookies.split(';').split(1).map(s => s.trim());
-	delete raw;
+	rawcookies.split(';').slice(1).forEach((x, i, a) => {
+		var t = x.trim();
+		var j = t.indexOf('=');
+		// Naked "key" handler without an =
+		if (j === -1) {
+			cookies[t] = null;
+		} else {
+			cookies[t.slice(0, j)] = t.slice(j + 1);
+		}
+	});
+
+	// Now we process the session cookie if needed, using AEAD
+	if (cookies.hasOwnProperty('session')) {
+		try {
+			var decoded = aead.decrypt(cookies['session'], secrets.server_key);
+			cookies.session = JSON.parse(decoded);
+		} catch (e) {
+			console.log(e);
+			console.log(cookies.session);
+			delete cookies.session;
+		}
+	}
+
+	console.log(cookies);
 
 	var f = endpoints.find(i => i.uri === uri);
 
@@ -63,3 +86,5 @@ server.on('request', (raw, res) => {
 
 // Finally select a listening port
 server.listen(8000);
+
+console.log(secrets);
