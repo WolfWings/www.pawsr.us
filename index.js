@@ -40,7 +40,7 @@ server.on('request', (raw, res) => {
 	var uri = tmp.pathname;
 	var query = tmp.query;
 
-	// Cookie parsing over-simplified here
+	// Cookie parsing
 	var cookies = {};
 	var rawcookies = '';
 	if (raw.headers.hasOwnProperty('cookies')) {
@@ -58,33 +58,32 @@ server.on('request', (raw, res) => {
 	});
 
 	// Now we process the session cookie if needed, using AEAD
+	var session = {};
 	if (cookies.hasOwnProperty('session')) {
 		try {
 			var decoded = aead.decrypt(cookies['session'], secrets.server_key);
-			cookies.session = JSON.parse(decoded);
+			session = JSON.parse(decoded);
 		} catch (e) {
 			console.log(e);
 			console.log(cookies.session);
+		} finally {
 			delete cookies.session;
 		}
 	}
 
-	console.log(cookies);
+	res.saveSession = (session) => {
+		res.setHeader('Set-Cookie', 'session=' + aead.encrypt(JSON.stringify(session), secrets.server_key) + '; HttpOnly; Path=/');
+	}
 
 	var f = endpoints.find(i => i.uri === uri);
 
 	if (typeof(f) !== 'undefined') {
-		f.routine(cookies, query, res);
+		f.routine(query, session, res);
+		res.end('\r\n');
 	} else {
-		res.write('Unknown URI!');
-		res.write('Cookies:\r\n' + JSON.stringify(cookies, null, '\t') + '\r\n');
-		res.write('Query: ' + JSON.stringify(query, null, '\t') + '\r\n');
-		res.write('URI: ' + uri);
+		console.log('Unknown URI: ' + query);
 	}
-	res.end('\r\n');
 });
 
 // Finally select a listening port
 server.listen(8000);
-
-console.log(secrets);

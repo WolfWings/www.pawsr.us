@@ -2,7 +2,7 @@ exports.register = (endpoints) => {
 	console.log('Registering /...');
 	endpoints.push({
 		uri: '/'
-	,	routine: (cookies, query, res) => {
+	,	routine: (query, session, res) => {
 
 
 

@@ -2,7 +2,7 @@ exports.register = (endpoints) => {
 	console.log('Registering /login/twitter...');
 	endpoints.push({
 		uri: '/login/twitter'
-	,	routine: (cookies, query, res) => {
+	,	routine: (query, session, res) => {
 
 
 
