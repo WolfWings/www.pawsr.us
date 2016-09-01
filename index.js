@@ -86,13 +86,13 @@ server.on('request', (raw, res) => {
 	var f = endpoints.find(i => i.uri === uri);
 
 	if (typeof(f) === 'undefined') {
-		console.log('Unknown URI: ' + query);
+		console.log('Unknown URI: ' + uri + '?' + query);
 		res.statusCode = 307;
 		res.setHeader('Location: /');
-		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>');
+		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>', 'utf8');
 	} else {
 		f.routine(query, session, res);
-		res.end('\r\n');
+		res.end();
 	}
 });
 
