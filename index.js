@@ -1,6 +1,6 @@
 // We only use http, url, path, and fs once each, so there's no 'require' boilerplate
 
-var secrets = require('./secrets.js').secrets;
+var secrets = require('./secrets.js');
 var aead = require('./aead.js');
 
 // Endpoints uses the following structure:
@@ -72,6 +72,7 @@ server.on('request', (raw, res) => {
 	}
 
 	res.saveSession = (session) => {
+		var cookies = res.getHeader('Set-Cookie');
 		res.setHeader('Set-Cookie', 'session=' + aead.encrypt(JSON.stringify(session), secrets.server_key) + '; HttpOnly; Path=/');
 	}
 

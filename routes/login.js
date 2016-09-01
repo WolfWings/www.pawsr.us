@@ -6,6 +6,7 @@ exports.register = (endpoints) => {
 
 
 
+session.user = Math.floor(Math.random() * 1000000);
 res.saveSession(session);
 res.write('Display /login page...');
 

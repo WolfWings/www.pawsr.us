@@ -9,9 +9,11 @@ var crypto = require('crypto');
 
 var loop, password, encrypted, decrypted;
 
+var fullpassword = crypto.randomBytes(1000000 + 32);
+
 for (loop = 0; loop < 1000000; loop++) {
 	var text = proc.argv[2] || crypto.randomBytes(48).toString('base64');
-	password = require('crypto').randomBytes(32);
+	password = fullpassword.slice(loop, loop + 32);
 	encrypted = aead.encrypt(text, password);
 	decrypted = aead.decrypt(encrypted, password);
 	if (decrypted !== text) {
@@ -21,6 +23,7 @@ for (loop = 0; loop < 1000000; loop++) {
 		console.log('[' + decrypted + ']');
 	}
 	if ((loop % 10000) === 0) {
-		process.stdout.write('' + ((1000000 - loop) / 10000) + '% remaining \r');
+		process.stdout.write('\r' + ((1000000 - loop) / 10000) + '% remaining \b');
 	}
 }
+process.stdout.write('\n');
