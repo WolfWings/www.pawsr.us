@@ -72,8 +72,15 @@ server.on('request', (raw, res) => {
 	}
 
 	res.saveSession = (session) => {
-		var cookies = res.getHeader('Set-Cookie');
-		res.setHeader('Set-Cookie', 'session=' + aead.encrypt(JSON.stringify(session), secrets.server_key) + '; HttpOnly; Path=/');
+		var sessioncookie = '';
+		try {
+			sessioncookie = aead.encrypt(JSON.stringify(session), secrets.server_key);
+		} catch (e) {
+			console.log(e);
+			console.log(session);
+		} finally {
+			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Path=/');
+		}
 	}
 
 	var f = endpoints.find(i => i.uri === uri);
