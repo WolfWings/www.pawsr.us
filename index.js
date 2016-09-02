@@ -3,6 +3,14 @@
 var secrets = require('./secrets.js');
 var aead = require('./aead.js');
 
+// Application-specific GLOBALS entries
+//
+// While generally frowned upon, this is the cleanest way to allow segmented
+// addition of additional services supported.
+//
+// In this case, supported 'services' to know what to callback later:
+global.services = [];
+
 // Endpoints uses the following structure:
 //	uri: NON-REGEX uri to match against, including leading /
 //	routine: Function called w/ (query, headers, res) parameters
@@ -91,7 +99,10 @@ server.on('request', (raw, res) => {
 		res.setHeader('Location: /');
 		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>', 'utf8');
 	} else {
+		res.setHeader('Content-Type', 'text/html');
+		console.time(uri);
 		f.routine(query, session, res);
+		console.timeEnd(uri);
 		res.end();
 	}
 });

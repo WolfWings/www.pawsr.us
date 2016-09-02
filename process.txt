@@ -1,3 +1,8 @@
+Session State:
+
+userid: <integer, authenticated internal userid>
+login.<service>: 
+
 Direct HREF to login URLs, skip one redirect
 /			Main Homepage
 	If logged out:
@@ -8,10 +13,11 @@ Direct HREF to login URLs, skip one redirect
 		Profile Management (link to /profile)
 
 /login			Main login endpoint
+
 	List servics supported
 
 	For all services:
-		If 'service_${service}' cookie exists:
+		If 'login.${service}' exists:
 			Check status
 
 			If 'waiting' status:
@@ -41,12 +47,15 @@ Direct HREF to login URLs, skip one redirect
 				Mark service-specific-UID as 'logged in' for this session
 				Link: Leads to /services/<service>/<service-specific-UID>
 
-		If 'service_${service}' cookie does NOT exist:
+		If 'login.${service}' does NOT exist:
 
-			If service marked 'verified' on this session:
-				If specific instance of service for account matched ssUID...
+			Link: Leads to /services/<service>/<service-specific-UID>
+
+			If 'service.${service}' exists on this session:
+				If ssUID matches 'service.${service}' then:
 					Add CSS for 'verified' state to icon
-					Link: Leads to /services/<service>/<service-specific-UID>
+				If ssUID does NOT match 'service.${service}' then:
+					Add 'cannot click' state to icon
 
 		Default:
 			Add CSS for 'add/login' state to icon

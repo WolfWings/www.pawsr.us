@@ -10,7 +10,7 @@ exports.register = (endpoints) => {
 
 
 
-if (session.hasOwnProperty('userID')) {
+if (session.hasOwnProperty('userid')) {
 	res.write(loggedin);
 } else {
 	res.write(loggedout);
