@@ -1,11 +1,11 @@
 var fs = require('fs');
 
-exports.register = (endpoints) => {
+exports.register = (endpoints, shared_data) => {
 	var ico = fs.readFileSync('./static/favicon/favicon.ico');
 	console.log('Registering /favicon.ico');
 	endpoints.push({
 		uri: '/favicon.ico'
-	,	routine: (query, session, res) => {
+	,	routine: (data, res) => {
 
 
 
@@ -21,7 +21,7 @@ res.write(ico);
 	console.log('Registering /favicon.png');
 	endpoints.push({
 		uri: '/favicon.png'
-	,	routine: (query, session, res) => {
+	,	routine: (data, res) => {
 
 
 
@@ -37,7 +37,7 @@ res.write(png);
 	console.log('Registering /apple-touch-icon.png');
 	endpoints.push({
 		uri: '/apple-touch-icon.png'
-	,	routine: (query, session, res) => {
+	,	routine: (data, res) => {
 
 
 

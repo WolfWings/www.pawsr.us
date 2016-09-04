@@ -2,15 +2,15 @@ var fs = require('fs');
 var loggedout = fs.readFileSync('./static/homepage/loggedout.html');;
 var loggedin = fs.readFileSync('./static/homepage/loggedin.html');
 
-exports.register = (endpoints) => {
+exports.register = (endpoints, shared_data) => {
 	console.log('Registering /');
 	endpoints.push({
 		uri: '/'
-	,	routine: (query, session, res) => {
+	,	routine: (data, res) => {
 
 
 
-if (session.hasOwnProperty('userid')) {
+if (data.session.hasOwnProperty('userid')) {
 	res.write(loggedin);
 } else {
 	res.write(loggedout);

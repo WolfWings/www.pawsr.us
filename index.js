@@ -1,19 +1,18 @@
-// We only use http, url, path, and fs once each, so there's no 'require' boilerplate
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
 
-var secrets = require('./secrets.js');
-var aead = require('./aead.js');
-
-// Application-specific GLOBALS entries
+// Shared 'global' data for all routes/endpoints
 //
 // While generally frowned upon, this is the cleanest way to allow segmented
-// addition of additional services supported.
-//
-// In this case, supported 'services' to know what to callback later:
-global.services = [];
+// addition of additional services supported, and other modular additions.
+var shared_data = {
+	services: []
+};
 
 // Endpoints uses the following structure:
 //	uri: NON-REGEX uri to match against, including leading /
-//	routine: Function called w/ (query, headers, res) parameters
+//	routine: Function called w/ (data, res) parameters
 //
 // Use a recursive loader to load in all the routes to keep things tidy
 //
@@ -22,14 +21,18 @@ global.services = [];
 // this will be via a simple .push() call adding it's two-entry object, but
 // it is left open in case alternative approaches become required.
 var endpoints = [];
-require('fs').readdirSync(require('path').join(__dirname, 'routes')).forEach((file) => {
-	require('./routes/' + file).register(endpoints);
+fs.readdirSync(path.join(__dirname, 'routes')).forEach((file) => {
+	require('./routes/' + file).register(endpoints, shared_data);
 });
+
+// Archive the shared_data into JSON format to avoid the per-request
+// JSON.stringify call in the object-->JSON-->object cloning process.
+shared_data = JSON.stringify(shared_data);
 
 // Build the HTTP listener server
 //
 // Default action is to just close the socket as a failsafe
-var server = require('http').createServer((req, res) => {
+var server = http.createServer((req, res) => {
 	res.end;
 });
 
@@ -44,6 +47,10 @@ server.on('clientError', (err, socket) => {
 //
 // Also parse out the 'cookies' from the headers
 server.on('request', (raw, res) => {
+	const url = require('url');
+	const aead = require('./aead.js');
+	const server_key = require('./secrets.js').server_key;
+
 	var tmp = require('url').parse(raw.url, true);
 	var uri = tmp.pathname;
 	var query = tmp.query;
@@ -69,7 +76,7 @@ server.on('request', (raw, res) => {
 	var session = {};
 	if (cookies.hasOwnProperty('session')) {
 		try {
-			var decoded = aead.decrypt(cookies['session'], secrets.server_key);
+		var decoded = aead.decrypt(cookies['session'], server_key);
 			session = JSON.parse(decoded);
 		} catch (e) {
 			console.log(e);
@@ -82,7 +89,7 @@ server.on('request', (raw, res) => {
 	res.saveSession = (session) => {
 		var sessioncookie = '';
 		try {
-			sessioncookie = aead.encrypt(JSON.stringify(session), secrets.server_key);
+			sessioncookie = aead.encrypt(JSON.stringify(session), server_key);
 		} catch (e) {
 			console.log(e);
 			console.log(session);
@@ -94,16 +101,22 @@ server.on('request', (raw, res) => {
 	var f = endpoints.find(i => i.uri === uri);
 
 	if (typeof(f) === 'undefined') {
-		console.log('Unknown URI: ' + uri + '?' + query);
+		console.log('Unknown URI: ' + uri);
 		res.statusCode = 307;
-		res.setHeader('Location: /');
-		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>', 'utf8');
+		res.setHeader('Location', '/');
+		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>\r\n\r\n', 'utf8');
 	} else {
-		res.setHeader('Content-Type', 'text/html');
+		var tempdata;
+
 		console.time(uri);
-		f.routine(query, session, res);
-		console.timeEnd(uri);
+		tempdata = JSON.parse(shared_data);
+		tempdata.query = query;
+		tempdata.session = session;
+		res.setHeader('Content-Type', 'text/html');
+		f.routine(tempdata, res);
 		res.end();
+		console.timeEnd(uri);
+		console.log(tempdata);
 	}
 });
 

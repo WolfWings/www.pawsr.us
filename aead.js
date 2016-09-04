@@ -1,4 +1,4 @@
-var crypto = require('crypto');
+const crypto = require('crypto');
 
 // Transmission structure is a series of .-seperated fields
 //	[0] is always the encrypted data, in base64 format
