@@ -6,7 +6,7 @@ const http = require('http');
 //
 // While generally frowned upon, this is the cleanest way to allow segmented
 // addition of additional services supported, and other modular additions.
-var shared_data = {
+var shared_data_build = {
 	services: []
 };
 
@@ -22,15 +22,23 @@ var shared_data = {
 // it is left open in case alternative approaches become required.
 var endpoints = [];
 fs.readdirSync(path.join(__dirname, 'routes')).forEach((file) => {
-	require('./routes/' + file).register(endpoints, shared_data);
+	// Only load ".js" files in the directory non-recursively
+	if (fs.stat('./routes/' + file).isFile()
+	 && (path.extname(file) === '.js')
+	   ) {
+		require('./routes/' + file).register(endpoints, shared_data_build);
+	}
 });
 
 // Archive the shared_data into JSON format to avoid the per-request
 // JSON.stringify call in the object-->JSON-->object cloning process.
-shared_data = JSON.stringify(shared_data);
+const shared_data = JSON.stringify(shared_data_build);
+delete shared_data_build;
 
+//
 // Build the HTTP listener server
 //
+
 // Default action is to just close the socket as a failsafe
 var server = http.createServer((req, res) => {
 	res.end;
