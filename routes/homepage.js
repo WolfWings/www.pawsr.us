@@ -1,6 +1,8 @@
-var fs = require('fs');
-var loggedout = fs.readFileSync('./static/homepage/loggedout.html');;
-var loggedin = fs.readFileSync('./static/homepage/loggedin.html');
+const fs = require('fs');
+const loggedout_html = fs.readFileSync('./static/homepage/loggedout.html').toString('utf8');
+const loggedin_html = fs.readFileSync('./static/homepage/loggedin.html').toString('utf8');
+const loggedout_css = fs.readFileSync('./static/homepage/loggedout.css').toString('utf8');
+const loggedin_css = fs.readFileSync('./static/homepage/loggedin.css').toString('utf8');
 
 exports.register = (endpoints, shared_data) => {
 	console.log('Registering /');
@@ -10,11 +12,18 @@ exports.register = (endpoints, shared_data) => {
 
 
 
+res.write(data.boilerplate.pretitle);
+res.title('www.pawsr.us');
 if (data.session.hasOwnProperty('userid')) {
-	res.write(loggedin);
+	res.stylesheet(loggedin_css);
+	res.write(data.boilerplate.prebody);
+	res.write(loggedin_html);
 } else {
-	res.write(loggedout);
+	res.stylesheet(loggedout_css);
+	res.write(data.boilerplate.prebody);
+	res.write(loggedout_html);
 }
+res.write(data.boilerplate.postbody);
 
 
 

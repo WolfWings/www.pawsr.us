@@ -8,12 +8,11 @@ exports.register = (endpoints) => {
 
 data.session.user = Math.floor(Math.random() * 1000000);
 res.saveSession(data.session);
-res.write(
-`<!doctype html>
-<html><head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="/favicon.png">`
-);
+res.write(data.boilerplate.pretitle);
+res.title('Login - www.pawsr.us');
+res.write(data.boilerplate.prebody);
+res.write('<p>Login</p>');
+res.write(data.boilerplate.postbody);
 
 
 
