@@ -13,13 +13,17 @@ exports.register = (endpoints, shared_data) => {
 
 
 res.write(data.boilerplate.pretitle);
-res.title('www.pawsr.us');
+res.write('<title>www.pawsr.us</title>');
 if (data.session.hasOwnProperty('userid')) {
-	res.stylesheet(loggedin_css);
+	res.write('<style type="text/css">');
+	res.write(loggedin_css);
+	res.write('</style>')
 	res.write(data.boilerplate.prebody);
 	res.write(loggedin_html);
 } else {
-	res.stylesheet(loggedout_css);
+	res.write('<style type="text/css">');
+	res.write(loggedout_css);
+	res.write('</style>')
 	res.write(data.boilerplate.prebody);
 	res.write(loggedout_html);
 }

@@ -12,7 +12,7 @@ exports.register = (endpoints, shared_data) => {
 
 
 res.write(data.boilerplate.pretitle);
-res.title('Twitter Login Callback - www.pawsr.us');
+res.write('<title>Twitter Login Callback - www.pawsr.us</title>');
 res.write(data.boilerplate.prebody);
 res.write('<p>Process callback from Twitter for login...</p>');
 res.write(data.boilerplate.postbody);

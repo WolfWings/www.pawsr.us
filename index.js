@@ -67,6 +67,17 @@ server.on('request', (raw, res) => {
 	var tmp = require('url').parse(raw.url, true);
 	var uri = tmp.pathname;
 	var query = tmp.query;
+	var route = endpoints.find(i => i.uri === uri);
+	var tempdata;
+
+	// Early bail-out of invalid routes to avoid session decoding when possible
+	if (typeof(route) === 'undefined') {
+		console.log('Unknown URI: ' + uri);
+		res.statusCode = 307;
+		res.setHeader('Location', '/');
+		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>\r\n\r\n', 'utf8');
+		return;
+	}
 
 	// Cookie parsing
 	var cookies = {};
@@ -99,18 +110,8 @@ server.on('request', (raw, res) => {
 		}
 	}
 
-	res.styleSheet = (css) => {
-		res.write('<style type="text/css">');
-		res.write(css);
-		res.write('</style>');
-	}
-
-	res.title = (title) => {
-		res.write('<title>');
-		res.write(title);
-		res.write('</title>');
-	}
-
+	// Utility DRY function for storing an updated session-state
+	// Note that this must be called manually IF saving changes!
 	res.saveSession = (session) => {
 		var sessioncookie = '';
 		try {
@@ -123,26 +124,15 @@ server.on('request', (raw, res) => {
 		}
 	}
 
-	var f = endpoints.find(i => i.uri === uri);
-
-	if (typeof(f) === 'undefined') {
-		console.log('Unknown URI: ' + uri);
-		res.statusCode = 307;
-		res.setHeader('Location', '/');
-		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>\r\n\r\n', 'utf8');
-	} else {
-		var tempdata;
-
-		console.time(uri);
-		tempdata = JSON.parse(shared_data);
-		tempdata.query = query;
-		tempdata.session = session;
-		res.setHeader('Content-Type', 'text/html');
-		f.routine(tempdata, res);
-		res.end();
-		console.timeEnd(uri);
-		console.log(tempdata);
-	}
+	console.time(uri);
+	tempdata = JSON.parse(shared_data);
+	tempdata.query = query;
+	tempdata.session = session;
+	res.setHeader('Content-Type', 'text/html');
+	route.routine(tempdata, res);
+	res.end();
+	console.timeEnd(uri);
+	console.log(tempdata);
 });
 
 // Finally select a listening port
