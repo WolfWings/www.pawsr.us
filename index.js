@@ -2,6 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 
+console.log('Secret Data:');
+console.log(JSON.stringify(require('./secrets.js'), null, 2));
+
 // Shared 'global' data for all routes/endpoints
 //
 // While generally frowned upon, this is the cleanest way to allow segmented
@@ -59,7 +62,7 @@ server.on('clientError', (err, socket) => {
 server.on('request', (raw, res) => {
 	const url = require('url');
 	const aead = require('./aead.js');
-	const server_key = require('./secrets.js').server_key;
+	const server_key = Buffer.from(require('./secrets.js').server_key, 'base64');
 
 	var tmp = require('url').parse(raw.url, true);
 	var uri = tmp.pathname;
