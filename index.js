@@ -124,15 +124,15 @@ server.on('request', (raw, res) => {
 		}
 	}
 
-	console.time(uri);
+//	console.time(uri);
 	tempdata = JSON.parse(shared_data);
 	tempdata.query = query;
 	tempdata.session = session;
 	res.setHeader('Content-Type', 'text/html');
 	route.routine(tempdata, res);
 	res.end();
-	console.timeEnd(uri);
-	console.log(tempdata);
+//	console.timeEnd(uri);
+//	console.log(tempdata);
 });
 
 // Finally select a listening port
