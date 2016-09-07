@@ -21,7 +21,7 @@ Direct HREF to login URLs, skip one redirect
 			Check status
 
 			If 'waiting' status:
-				Set meta-refresh for the page to 5 seconds
+				NoJS Meta-refresh to myself
 				Add CSS for 'pinwheel' state to icon
 				Link: Disabled
 				JavaScript:
@@ -69,9 +69,9 @@ Direct HREF to login URLs, skip one redirect
 
 	Set 'prelogin_${service}' session variable to UUID
 
-	Redirect to '/prelogin/service'
+	NoJS Meta-refresh to myself
 
-	
+	JS queries /ajax/prelogin/${service} on constant loop instead
 
 /login/<service>	Return callback for each service
 
