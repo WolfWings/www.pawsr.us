@@ -61,11 +61,21 @@ Direct HREF to login URLs, skip one redirect
 			Add CSS for 'add/login' state to icon
 			Link: Leads to service-specific login URL
 
+/prelogin/<service>	Support URL for oauth1-based login mechanisms
+
+	Create UUID
+
+	Set 'prelogin_${service}_${UUID}' key on memcached to 'in progress'
+
+	Set 'prelogin_${service}' session variable to UUID
+
+	Redirect to '/prelogin/service'
+
+	
+
 /login/<service>	Return callback for each service
 
-	Set 'session' cookie if it doesn't exist
-
-	Set 'service_${service}' cookie
+	Set 'service_${service}' session variable
 
 	Set memcache value for '${session}:${service}' to 'Processing' state
 
