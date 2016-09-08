@@ -1,4 +1,4 @@
-var global.store = {};
+global.store = {};
 
 exports.set = (key, value) => {
 	global.store[key] = value;
