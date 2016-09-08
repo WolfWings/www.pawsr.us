@@ -75,7 +75,7 @@ server.on('request', (raw, res) => {
 		console.log('Unknown URI: ' + uri);
 		res.statusCode = 307;
 		res.setHeader('Location', '/');
-		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=/"></head><body></body></html>\r\n\r\n', 'utf8');
+		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="0; url=/"></head><body></body></html>', 'utf8');
 		return;
 	}
 
