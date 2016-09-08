@@ -20,7 +20,6 @@ if (data.session.hasOwnProperty('prelogin_twitter')) {
 } else {
 	uuid = util.nonce();
 	var nonce = util.nonce();
-	console.log(uuid);
 	keyvalue.set('prelogin_twitter_' + uuid, 'wip');
 	data.session['prelogin_twitter'] = uuid;
 	res.saveSession(data.session);
@@ -34,14 +33,7 @@ if (data.session.hasOwnProperty('prelogin_twitter')) {
 	,	oauth_version: '1.0'
 	};
 
-	var params_qs = querystring.stringify(params);
-
-	var mydata = 'POST' + '&' + querystring.escape('https://api.twitter.com/oauth/request_token') + '&' + querystring.escape(params_qs);
-	console.log(mydata.split('&'));
-
-	var hmac = crypto.createHmac('sha1', secrets.secretKey + '&');
-	hmac.update(mydata);
-	var authorization = 'OAuth oauth_signature="' + querystring.escape(hmac.digest('base64')) + '"';
+	var authorization = 'OAuth oauth_signature=' + util.oauth1_signature('POST', 'https:\x2F/api.twitter.com/oauth/request_token', params, secrets.secretKey, '', 'sha1');
 
 	var url = {
 		method: 'POST'
@@ -53,21 +45,17 @@ if (data.session.hasOwnProperty('prelogin_twitter')) {
 			'Accept': '*/*'
 		,	'Authorization': authorization
 		,	'Connection': 'close'
-		,	'Content-Length': `${params_qs.length}`
 		,	'Content-Type': 'application/x-www-form-urlencoded'
 		,	'Host': 'api.twitter.com'
 		,	'User-Agent': 'web:www.pawsr.us:v0.9.9 (by /u/wolfwings)'
 		}
 	};
 
-	console.log(JSON.stringify(url, null, 4));
-
 	var request = https.request(url, (response) => {
 		var buffer = Buffer.alloc(0);
 		console.log(`STATUS: ${response.statusCode}`);
 		if (response.statusCode !== 200) {
 			response.destroy();
-			response.on('data', (chunk) => { return; });
 			return;
 		}
 
@@ -82,7 +70,7 @@ if (data.session.hasOwnProperty('prelogin_twitter')) {
 	request.on('error', (e) => {
 		console.log(`Problem with request: ${e.message}`);
 	});
-	request.write(params_qs);
+	request.write(querystring.stringify(params));
 	request.end();
 
 }
@@ -93,7 +81,7 @@ if (state === 'wip') {
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
 	res.write(util.noscriptrefresh(1, '/prelogin/twitter'));
 	res.write(data.boilerplate.prebody);
-	res.write('<p>Process callback from Twitter for login...</p>');
+	res.write('<p>Requesting unique login token from twitter...</p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }
@@ -101,7 +89,7 @@ if (state === 'wip') {
 delete data.session['prelogin_twitter'];
 res.saveSession(data.session);
 
-if (!state.startsWith('readu:')) {
+if (!state.startsWith('ready:')) {
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authroizer - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
@@ -113,7 +101,7 @@ if (!state.startsWith('readu:')) {
 
 res.statusCode = 307;
 res.setHeader('Location', state.slice(6));
-res.write('<!doctype html><html><head><meta http-equiv="refresh" content="1; url=' + state.slice(6) + '"></head><body></body></html>\r\n\r\n', 'utf8');
+res.write('<!doctype html><html><head><meta http-equiv="refresh" content="0; url=' + state.slice(6) + '"></head><body></body></html>\r\n\r\n', 'utf8');
 
 
 
