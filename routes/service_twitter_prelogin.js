@@ -1,12 +1,4 @@
 exports.register = (endpoints, shared_data) => {
-	const crypto = require('crypto');
-	const keyvalue = require('../keyvalue.js');
-	const util = require('../util.js');
-	const querystring = require('querystring');
-	const secrets = require('../secrets.js').services.twitter;
-	const https = require('https');
-	const url = require('url');
-
 	console.log('Registering /prelogin/twitter');
 	endpoints.push({
 		uri: '/prelogin/twitter'
@@ -14,11 +6,15 @@ exports.register = (endpoints, shared_data) => {
 
 
 
-var uuid;
-if (data.session.hasOwnProperty('prelogin_twitter')) {
-	uuid = data.session['prelogin_twitter'];
-} else {
-	uuid = util.nonce();
+const querystring = require('querystring');
+const https = require('https');
+
+const keyvalue = require('../keyvalue.js');
+const secrets = require('../secrets.js').services.twitter;
+const util = require('../util.js');
+
+if (!data.session.hasOwnProperty('prelogin_twitter')) {
+	var uuid = util.nonce();
 	var nonce = util.nonce();
 	keyvalue.set('prelogin_twitter_' + uuid, 'wip');
 	data.session['prelogin_twitter'] = uuid;
@@ -41,10 +37,10 @@ if (data.session.hasOwnProperty('prelogin_twitter')) {
 	,	host: 'api.twitter.com'
 	,	port: 443
 	,	path: '/oauth/request_token'
+	,	agent: false
 	,	headers: {
 			'Accept': '*/*'
 		,	'Authorization': authorization
-		,	'Connection': 'close'
 		,	'Content-Type': 'application/x-www-form-urlencoded'
 		,	'Host': 'api.twitter.com'
 		,	'User-Agent': 'web:www.pawsr.us:v0.9.9 (by /u/wolfwings)'
@@ -74,6 +70,8 @@ if (data.session.hasOwnProperty('prelogin_twitter')) {
 	request.end();
 
 }
+
+var uuid = data.session['prelogin_twitter'];
 
 var state = keyvalue.get('prelogin_twitter_' + uuid);
 if (state === 'wip') {
