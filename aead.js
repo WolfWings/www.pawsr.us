@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
-// Transmission structure is a series of .-seperated fields
-//	[0] is always the encrypted data, in base64 format
+// Transmission structure is a series of .-seperated UNPADDED base64-encoded fields
+//	[0] is always the encrypted data
 //	[1] is always the algorithm tag, to allow for expansion/changes
 //		An empty field specifies the aes-256-gcm cipher
 //			This requires a 32-byte/256-bit password
