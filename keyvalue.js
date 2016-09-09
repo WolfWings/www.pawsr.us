@@ -15,12 +15,13 @@ try {
 	stats = err;
 }
 
-if ((stats instanceof Error) &&
-    (stats.code === 'ENOENT')) {
-	fs.mkdirSync('./keyvalue');
-	stats = fs.statSync('./keyvalue');
-} else if (stats instanceof Error) {
-	throw stats;
+if (stats instanceof Error) {
+	if (stats.code === 'ENOENT') {
+		fs.mkdirSync('./keyvalue');
+		stats = fs.statSync('./keyvalue');
+	} else {
+		throw stats;
+	}
 } else if (stats.isDirectory() === false) {
 	throw Error('keyvalue exists, but is not a directory!');
 }
@@ -35,7 +36,6 @@ function exitHandler(options, err) {
 //			console.log(file);
 			fs.unlinkSync('./keyvalue/' + file);
 		});
-		fs.rmdirSync('./keyvalue');
 		if (options.exit) process.exit();
 	}
 }
@@ -58,7 +58,6 @@ exports.set = (key, value) => {
 	var trueKey = safeKey(key);
 	// Unsafe to use fs.writeFile without waiting for the callback
 	// So we're stuck with the sync version for this use-case
-//	console.log(key + ' => ' + value);
 	try {
 		fs.writeFileSync('./keyvalue/' + trueKey, value);
 	} catch (err) {
@@ -69,21 +68,16 @@ exports.set = (key, value) => {
 exports.get = (key) => {
 	var value = null;
 	var trueKey = safeKey(key);
-//	console.log(key + ' <=');
 	try {
 		value = fs.readFileSync('./keyvalue/' + trueKey).toString('utf8');
 	} catch (err) {
-//		console.log(err.stacktrace);
-//		console.log(err.message);
 		value = null;
 	}
-//	console.log(value);
 	return value;
 }
 
 exports.delete = (key) => {
 	var trueKey = safeKey(key);
-//	console.log('[' + key + ']');
 	// THIS we can do async at least, huzzah!
 	fs.unlink('./keyvalue/' + trueKey, (err) => {
 		return;
