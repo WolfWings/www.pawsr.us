@@ -61,8 +61,6 @@ if (!data.session.hasOwnProperty('prelogin_twitter')) {
 		});
 		response.on('end', () => {
 			var results = querystring.parse(buffer.toString('utf8'));
-			console.log(results);
-			console.log(typeof results);
 			try {
 				if (results['oauth_callback_confirmed'] !== 'true') {
 					throw new TypeError('Twitter oauth_callback_confirmed not true!');
@@ -99,7 +97,7 @@ if (state === null) {
 if (state === 'wip') {
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
-	res.write(util.noscriptrefresh(1, '/prelogin/twitter'));
+	res.write(util.refresh(1, '/prelogin/twitter'));
 	res.write(data.boilerplate.prebody);
 	res.write('<p>Requesting unique login token from twitter...</p>');
 	res.write(data.boilerplate.postbody);

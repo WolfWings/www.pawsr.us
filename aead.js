@@ -7,26 +7,49 @@ const crypto = require('crypto');
 //			This requires a 32-byte/256-bit password
 //	[2] and beyond are algorithm-specific data
 //	For aes-256-gcm:
-//		[2] is the IV
+//		[2] is the IV/Nonce
 //		[3] is the GCM Authentication Tag
 
 exports.encrypt = (text, password) => {
-	var components = [null, Buffer.alloc(0), crypto.randomBytes(24), null];
-	var engine = crypto.createCipheriv('aes-256-gcm', password, components[2]);
-	components[0] = Buffer.concat([engine.update(Buffer.from(text, 'utf8')), engine.final()]);
-	components[3] = engine.getAuthTag();
-	return components.map(x => x.toString('base64').replace(/=+$/, '')).join('.');
+	// Using a nonce at least twice as long as the GHASH width to harden against collissions
+	var nonce = crypto.randomBytes(24);
+
+	// Empty field = default of aes-256-gcm
+	var method = Buffer.alloc(0);
+
+	// Build the cipher using the nonce and provided password
+	// The crypto package validates the password length, just
+	// let the error happen if it throws one, no try here.
+	var engine = crypto.createCipheriv('aes-256-gcm', password, nonce);
+
+	// Feel the encrypted text in all at once, and finalize it.
+	var encrypted = Buffer.concat([engine.update(Buffer.from(text, 'utf8')), engine.final()]);
+
+	// And store the MAC/AuthTag component for validation.
+	var mac = engine.getAuthTag();
+
+	// Finally assemble the string to return in the proper format,
+	// with tidy base64 encoding WITHOUT padding everywhere.
+	return [encrypted, method, nonce, mac].map((x) => {
+		return x.toString('base64').replace(/=+$/, '');
+	}).join('.');
 };
 
 exports.decrypt = (encrypted, password) => {
-	var engine, components = encrypted.split('.').map(x => Buffer.from(x, 'base64') );
+	// Can't use elegant named splits, since we can't guarantee future constructs will only
+	// use 4 fields. Future-proofing at the expense of some readability.
+	var engine
+	,   components = encrypted.split('.').map(x => Buffer.from(x, 'base64') )
+	,   text;
+
 	switch (components[1].toString('utf8')) {
 		case '':
 			engine = crypto.createDecipheriv('aes-256-gcm', password, components[2]);
 			engine.setAuthTag(components[3]);
 			break;
 		default:
-			throw new TypeError('Invalid Algorithm!');
+			throw new TypeError('Unknown Algorithm parameter!');
 	}
-	return Buffer.concat([engine.update(components[0]), engine.final()]).toString('utf8');
+	text = Buffer.concat([engine.update(components[0]), engine.final()]).toString('utf8');
+	return text;
 }

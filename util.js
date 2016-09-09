@@ -1,9 +1,13 @@
 const crypto = require('crypto');
 const querystring = require('querystring');
 
+exports.refresh = (timeout, url) => {
+	return	'<meta http-equiv="Refresh" content="' + timeout + ';URL=' + url + '" />';
+};
+
 exports.noscriptrefresh = (timeout, url) => {
 	return	'<script>document.write("\\x3Cscript>\x2F*");</script>'
-	+	'<meta http-equiv="Refresh" content="' + timeout + ';URL=' + url + '" />'
+	+	exports.refresh(timeout, url)
 	+	'<script>\x2F**\x2F</script>';
 };
 

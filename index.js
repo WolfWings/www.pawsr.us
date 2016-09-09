@@ -2,9 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 
-console.log('Secret Data:');
-console.log(JSON.stringify(require('./secrets.js'), null, 2));
-
 // Shared 'global' data for all routes/endpoints
 //
 // While generally frowned upon, this is the cleanest way to allow segmented
@@ -82,8 +79,8 @@ server.on('request', (raw, res) => {
 	// Cookie parsing
 	var cookies = {};
 	var rawcookies = '';
-	if (raw.headers.hasOwnProperty('cookies')) {
-		rawcookies = ';' + raw.headers.cookies;
+	if (raw.headers.hasOwnProperty('cookie')) {
+		rawcookies = ';' + raw.headers.cookie;
 	}
 	rawcookies.split(';').slice(1).forEach((x, i, a) => {
 		var t = x.trim();
@@ -120,7 +117,7 @@ server.on('request', (raw, res) => {
 			console.log(e);
 			console.log(session);
 		} finally {
-			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Path=/');
+			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Path=/; Domain=.pawsr.us');
 		}
 	}
 
