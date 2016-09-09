@@ -1,7 +1,7 @@
 exports.register = (endpoints, shared_data) => {
-	console.log('Registering /prelogin/twitter');
+	console.log('Registering /preauth/twitter');
 	endpoints.push({
-		uri: '/prelogin/twitter'
+		uri: '/preauth/twitter'
 	,	routine: (data, res) => {
 
 
@@ -14,70 +14,9 @@ const secrets = require('../secrets.js').services.twitter;
 const util = require('../util.js');
 
 if (!data.session.hasOwnProperty('prelogin_twitter')) {
-	var uuid = util.nonce();
-	var nonce = util.nonce();
-	keyvalue.set('prelogin_twitter_' + uuid, 'wip');
-	data.session['prelogin_twitter'] = uuid;
+	res.statusCode = 307;
 	res.saveSession(data.session);
-
-	var params = {
-		oauth_callback: 'https:\x2F/www.pawsr.us/login/twitter?state=' + uuid + '#'
-	,	oauth_consumer_key: secrets.oauthConsumerKey
-	,	oauth_nonce: nonce
-	,	oauth_signature_method: 'HMAC-SHA1'
-	,	oauth_timestamp: `${Math.floor(Date.now() / 1000)}`
-	,	oauth_version: '1.0'
-	};
-
-	var authorization = 'OAuth oauth_signature=' + util.oauth1_signature('POST', 'https:\x2F/api.twitter.com/oauth/request_token', params, secrets.secretKey, '', 'sha1');
-
-	var url = {
-		method: 'POST'
-	,	protocol: 'https:'
-	,	host: 'api.twitter.com'
-	,	port: 443
-	,	path: '/oauth/request_token'
-	,	agent: false
-	,	headers: {
-			'Accept': '*/*'
-		,	'Authorization': authorization
-		,	'Content-Type': 'application/x-www-form-urlencoded'
-		,	'Host': 'api.twitter.com'
-		,	'User-Agent': 'web:www.pawsr.us:v0.9.9 (by /u/wolfwings)'
-		}
-	};
-
-	var request = https.request(url, (response) => {
-		var buffer = Buffer.alloc(0);
-		if (response.statusCode !== 200) {
-			keyvalue.delete('prelogin_twitter_' + uuid);
-			response.destroy();
-			return;
-		}
-
-		response.setEncoding('utf8');
-		response.on('data', (chunk) => {
-			buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
-		});
-		response.on('end', () => {
-			var results = querystring.parse(buffer.toString('utf8'));
-			try {
-				if (results['oauth_callback_confirmed'] !== 'true') {
-					throw new TypeError('Twitter oauth_callback_confirmed not true!');
-				}
-				keyvalue.set('prelogin_twitter_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
-			} catch (err) {
-				keyvalue.set('prelogin_twitter_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
-				return;
-			}
-		});
-	});
-	request.on('error', (e) => {
-		console.log(`Problem with request: ${e.message}`);
-	});
-	request.write(querystring.stringify(params));
-	request.end();
-
+	res.setHeader('Location', '/initlogin/twitter');
 }
 
 var uuid = data.session['prelogin_twitter'];
@@ -97,20 +36,20 @@ if (state === null) {
 if (state === 'wip') {
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
-	res.write(util.refresh(1, '/prelogin/twitter'));
+	res.write(util.refresh(1, '/preauth/twitter'));
 	res.write(data.boilerplate.prebody);
 	res.write('<p>Requesting unique login token from twitter...</p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }
 
-// We no longer need the UUID record, so purge it.
+// We no longer need the UUID record serverside, so purge it.
 // Note we do *NOT* update the client-side cookie yet, as we may need to add more data to it first.
 keyvalue.delete('prelogin_twitter_' + uuid);
-delete data.session['prelogin_twitter'];
 
 // Errored out? Save session, give a screen with a link, we're done.
 if (state.startsWith('error:')) {
+	delete data.session['prelogin_twitter'];
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
@@ -123,6 +62,7 @@ if (state.startsWith('error:')) {
 
 // Unhandled state? Corruption possible, abort and provide a link.
 if (!state.startsWith('ready:')) {
+	delete data.session['prelogin_twitter'];
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');

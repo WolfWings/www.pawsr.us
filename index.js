@@ -59,11 +59,11 @@ server.on('clientError', (err, socket) => {
 server.on('request', (raw, res) => {
 	const url = require('url');
 	const aead = require('./aead.js');
+	const querystring = require('querystring');
 	const server_key = Buffer.from(require('./secrets.js').server_key, 'base64');
 
-	var tmp = require('url').parse(raw.url, true);
-	var uri = tmp.pathname;
-	var query = tmp.query;
+	var parsedurl = require('url').parse(raw.url, true);
+	var uri = parsedurl.pathname;
 	var route = endpoints.find(i => i.uri === uri);
 	var tempdata;
 
@@ -123,7 +123,7 @@ server.on('request', (raw, res) => {
 
 	console.time(uri);
 	tempdata = JSON.parse(shared_data);
-	tempdata.query = query;
+	tempdata.query = parsedurl.query;
 	tempdata.session = session;
 	res.setHeader('Content-Type', 'text/html');
 	route.routine(tempdata, res);
