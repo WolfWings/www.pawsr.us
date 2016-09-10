@@ -32,8 +32,6 @@ fs.readdirSync(path.join(__dirname, 'routes')).forEach((file) => {
 
 // Archive the shared_data into JSON format to avoid the per-request
 // JSON.stringify call in the object-->JSON-->object cloning process.
-console.log('Shared data:');
-console.log(JSON.stringify(shared_data_build, null, 2));
 const shared_data = JSON.stringify(shared_data_build);
 delete shared_data_build;
 
