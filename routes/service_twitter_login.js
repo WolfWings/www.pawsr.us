@@ -36,7 +36,7 @@ try {
 	res.write('<title>Twitter Login Callback - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
 	res.write('<p><b>Error:</b> Twitter did not successfully login.</p>');
-	res.write('<p><a href="/">Click here to go back to the homepage, and try again later.</a></p>');
+	res.write('<p><a href=\x22/\x22>Click here to go back to the homepage, and try again later.</a></p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }
@@ -100,7 +100,7 @@ var request = https.request(url, (response) => {
 	response.on('end', () => {
 		var results = querystring.parse(buffer.toString('utf8'));
 		try {
-			keyvalue.set(uuid, 'ready:' + results.user_id + ":" + results.screen_name);
+			keyvalue.set(uuid, 'ready:' + results.user_id + ':' + results.screen_name);
 		} catch (err) {
 			keyvalue.set(uuid, 'error:Failure to get proper auth token from twitter!');
 		}

@@ -15,13 +15,13 @@ exports.register = (endpoints, shared_data) => {
 res.write(data.boilerplate.pretitle);
 res.write('<title>www.pawsr.us</title>');
 if (data.session.hasOwnProperty('userid')) {
-	res.write('<style type="text/css">');
+	res.write('<style type=\x22text/css\x22>');
 	res.write(loggedin_css);
 	res.write('</style>')
 	res.write(data.boilerplate.prebody);
 	res.write(loggedin_html);
 } else {
-	res.write('<style type="text/css">');
+	res.write('<style type=\x22text/css\x22>');
 	res.write(loggedout_css);
 	res.write('</style>')
 	res.write(data.boilerplate.prebody);

@@ -55,7 +55,7 @@ if (state.startsWith('error:')) {
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
 	res.write('<p><b>Error!</b> ' + state.slice(6) + '</p>');
-	res.write('<p><a href="/">Click here to return to the homepage.</a></p>');
+	res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }
@@ -68,7 +68,7 @@ if (!state.startsWith('ready:')) {
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
 	res.write('<p><b>Unknown State!</b></p>');
-	res.write('<p><a href="/">Click here to return to the homepage.</a></p>');
+	res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }

@@ -22,7 +22,7 @@ var shared_data_build = {
 // it is left open in case alternative approaches become required.
 var endpoints = [];
 fs.readdirSync(path.join(__dirname, 'routes')).forEach((file) => {
-	// Only load ".js" files in the directory non-recursively
+	// Only load .js files in the directory non-recursively
 	if (fs.statSync('./routes/' + file).isFile()
 	 && (path.extname(file) === '.js')
 	   ) {
@@ -69,7 +69,7 @@ server.on('request', (raw, res) => {
 	if (typeof(route) === 'undefined') {
 		console.log('Unknown URI: ' + uri);
 		res.statusCode = 404;
-		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="0; url=/"></head><body></body></html>', 'utf8');
+		res.end('<!doctype html><html><head><meta http-equiv=\x22refresh\x22 content=\x220; url=/\x22></head><body></body></html>', 'utf8');
 		return;
 	}
 
@@ -82,7 +82,7 @@ server.on('request', (raw, res) => {
 	rawcookies.split(';').slice(1).forEach((x, i, a) => {
 		var t = x.trim();
 		var j = t.indexOf('=');
-		// Naked "key" handler without an =
+		// Naked key handler without an =
 		if (j === -1) {
 			cookies[t] = null;
 		} else {
