@@ -31,8 +31,8 @@ exports.encrypt = (text, password) => {
 	// Finally assemble the string to return in the proper format,
 	// with tidy base64 encoding WITHOUT padding everywhere.
 	return [encrypted, method, nonce, mac].map((x) => {
-		return x.toString('base64').replace(/=+$/, '');
-	}).join('.');
+		return x.toString('base64');
+	}).join('.').replace(/=/g, '');
 };
 
 exports.decrypt = (encrypted, password) => {

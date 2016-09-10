@@ -70,8 +70,7 @@ server.on('request', (raw, res) => {
 	// Early bail-out of invalid routes to avoid session decoding when possible
 	if (typeof(route) === 'undefined') {
 		console.log('Unknown URI: ' + uri);
-		res.statusCode = 307;
-		res.setHeader('Location', '/');
+		res.statusCode = 404;
 		res.end('<!doctype html><html><head><meta http-equiv="refresh" content="0; url=/"></head><body></body></html>', 'utf8');
 		return;
 	}
@@ -119,6 +118,10 @@ server.on('request', (raw, res) => {
 		} finally {
 			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Path=/; Domain=.pawsr.us');
 		}
+	}
+
+	res.deleteSession = () => {
+		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
 	console.time(uri);

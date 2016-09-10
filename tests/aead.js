@@ -9,13 +9,15 @@ var crypto = require('crypto');
 
 var loop, password, encrypted, decrypted;
 
-var fullpassword = crypto.randomBytes(1000000 + 32);
-var fulltext = crypto.randomBytes(48000000);
+console.log('Generating random data to use for testing...');
+
+var fullpassword = crypto.randomBytes(1000000 * 32);
+var fulltext = crypto.randomBytes(1000000 * 100);
 
 console.time('test');
 for (loop = 0; loop < 1000000; loop++) {
-	var text = proc.argv[2] || fulltext.slice(loop * 48, (loop + 1) * 48).toString('base64');
-	password = fullpassword.slice(loop, loop + 32);
+	var text = proc.argv[2] || fulltext.slice(loop * 100, (loop + 1) * 100).toString('base64');
+	password = fullpassword.slice(loop * 32, (loop + 1) * 32);
 	encrypted = aead.encrypt(text, password);
 	decrypted = aead.decrypt(encrypted, password);
 	if (decrypted !== text) {

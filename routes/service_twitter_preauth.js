@@ -13,19 +13,19 @@ const keyvalue = require('../keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 const util = require('../util.js');
 
-if (!data.session.hasOwnProperty('prelogin_twitter')) {
+if (!data.session.hasOwnProperty('twitter_uuid')) {
 	res.statusCode = 307;
 	res.saveSession(data.session);
 	res.setHeader('Location', '/initlogin/twitter');
 }
 
-var uuid = data.session['prelogin_twitter'];
+var uuid = data.session['twitter_uuid'];
 
-var state = keyvalue.get('prelogin_twitter_' + uuid);
+var state = keyvalue.get('twitter_uuid_' + uuid);
 
 // If there is no such UUID on record, boot entirely. Possible replay attack.
 if (state === null) {
-	delete data.session['prelogin_twitter'];
+	delete data.session['twitter_uuid'];
 	res.saveSession(data.session);
 	res.statusCode = 307;
 	res.setHeader('Location', '/');
@@ -45,11 +45,11 @@ if (state === 'wip') {
 
 // We no longer need the UUID record serverside, so purge it.
 // Note we do *NOT* update the client-side cookie yet, as we may need to add more data to it first.
-keyvalue.delete('prelogin_twitter_' + uuid);
+keyvalue.delete('twitter_uuid_' + uuid);
 
 // Errored out? Save session, give a screen with a link, we're done.
 if (state.startsWith('error:')) {
-	delete data.session['prelogin_twitter'];
+	delete data.session['twitter_uuid'];
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
@@ -62,7 +62,7 @@ if (state.startsWith('error:')) {
 
 // Unhandled state? Corruption possible, abort and provide a link.
 if (!state.startsWith('ready:')) {
-	delete data.session['prelogin_twitter'];
+	delete data.session['twitter_uuid'];
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');

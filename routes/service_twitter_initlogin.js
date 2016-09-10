@@ -15,8 +15,8 @@ const util = require('../util.js');
 
 var uuid = util.nonce();
 var nonce = util.nonce();
-keyvalue.set('prelogin_twitter_' + uuid, 'wip');
-data.session['prelogin_twitter'] = uuid;
+keyvalue.set('twitter_uuid_' + uuid, 'wip');
+data.session['twitter_uuid'] = uuid;
 res.statusCode = 307;
 res.saveSession(data.session);
 res.setHeader('Location', '/preauth/twitter');
@@ -51,7 +51,7 @@ var url = {
 var request = https.request(url, (response) => {
 	var buffer = Buffer.alloc(0);
 	if (response.statusCode !== 200) {
-		keyvalue.delete('prelogin_twitter_' + uuid);
+		keyvalue.delete('twitter_uuid_' + uuid);
 		response.destroy();
 		return;
 	}
@@ -66,9 +66,9 @@ var request = https.request(url, (response) => {
 			if (results['oauth_callback_confirmed'] !== 'true') {
 				throw new TypeError('Twitter oauth_callback_confirmed not true!');
 			}
-			keyvalue.set('prelogin_twitter_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
+			keyvalue.set('twitter_uuid_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
 		} catch (err) {
-			keyvalue.set('prelogin_twitter_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
+			keyvalue.set('twitter_uuid_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
 			return;
 		}
 	});
