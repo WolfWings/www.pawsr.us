@@ -11,8 +11,8 @@ const crypto = require('crypto');
 //		[3] is the GCM Authentication Tag
 
 exports.encrypt = (text, password) => {
-	// Using a nonce at least twice as long as the GHASH width to harden against collissions
-	var nonce = crypto.randomBytes(24);
+	// Using a nonce longer than 96 bits to force a full GHASH-width IV
+	var nonce = crypto.randomBytes(16);
 
 	// Empty field = default of aes-256-gcm
 	var method = Buffer.alloc(0);
