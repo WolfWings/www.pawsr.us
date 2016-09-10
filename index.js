@@ -130,7 +130,9 @@ server.on('request', (raw, res) => {
 	tempdata.session = session;
 	res.setHeader('Content-Type', 'text/html');
 	route.routine(tempdata, res);
-	res.end();
+	if (res.finished !== true) {
+		res.end();
+	}
 	console.timeEnd(uri);
 });
 

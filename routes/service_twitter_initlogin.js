@@ -20,6 +20,7 @@ data.session['twitter_uuid'] = uuid;
 res.statusCode = 307;
 res.saveSession(data.session);
 res.setHeader('Location', '/preauth/twitter');
+res.end();
 
 var params = {
 	oauth_callback:         'https:\x2F/www.pawsr.us/login/twitter?state=' + uuid + '#'

@@ -81,6 +81,7 @@ data.session['twitter_token'] = components[2];
 res.saveSession(data.session);
 res.statusCode = 307;
 res.setHeader('Location', 'https:\x2F/api.twitter.com/oauth/authenticate?oauth_token=' + components[2] + '#');
+res.end();
 
 
 

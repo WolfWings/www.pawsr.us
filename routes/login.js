@@ -17,6 +17,7 @@ data.services.forEach((x) => {
 });
 res.write('</ul>');
 res.write(data.boilerplate.postbody);
+res.end();
 
 
 

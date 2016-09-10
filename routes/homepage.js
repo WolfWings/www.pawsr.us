@@ -28,6 +28,7 @@ if (data.session.hasOwnProperty('userid')) {
 	res.write(loggedout_html);
 }
 res.write(data.boilerplate.postbody);
+res.end();
 
 
 

@@ -6,6 +6,9 @@ exports.register = (endpoints, shared_data) => {
 
 
 
+const querystring = require('querystring');
+const https = require('https');
+
 const keyvalue = require('../keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 const util = require('../util.js');
@@ -32,9 +35,11 @@ try {
 } catch (err) {
 	console.log('Twitter: ' + err.message);
 	console.log(err.stacktrack);
+
 	delete(data.session.twitter_uuid);
 	delete(data.session.twitter_token);
 	delete(data.session.twitter_token_secret);
+
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Login Callback - www.pawsr.us</title>');
@@ -63,13 +68,66 @@ var authorization = 'OAuth oauth_signature=' + util.oauth1_signature(
 ,	data.session.twitter_token_secret
 ,	'sha1');
 
-keyvalue.set('twitter_login_' + data.session.twitter_uuid, 'wip');
+var url = {
+	method: 'POST'
+,	protocol: 'https:'
+,	host: 'api.twitter.com'
+,	port: 443
+,	path: '/oauth/access_token'
+,	agent: false
+,	headers: {
+		'Accept': '*/*'
+	,	'Authorization': authorization
+	,	'Content-Type': 'application/x-www-form-urlencoded'
+	,	'Host': 'api.twitter.com'
+	,	'User-Agent': 'web:www.pawsr.us:v0.9.9 (by /u/wolfwings)'
+	}
+};
 
-res.write(data.boilerplate.pretitle);
-res.write('<title>Twitter Login Callback - www.pawsr.us</title>');
-res.write(data.boilerplate.prebody);
-res.write('<p>Process callback from Twitter for login...</p>');
-res.write(data.boilerplate.postbody);
+var uuid = data.session.twitter_uuid;
+keyvalue.set('login_twitter_' + data.session.twitter_uuid, 'wip');
+delete(data.session.twitter_token);
+delete(data.session.twitter_token_secret);
+
+res.statusCode = 307;
+res.saveSession(data.session);
+res.setHeader('Location', '/login');
+res.end();
+
+console.time(uuid);
+var request = https.request(url, (response) => {
+	var buffer = Buffer.alloc(0);
+	if (response.statusCode !== 200) {
+		console.timeEnd(uuid);
+		keyvalue.set('login_twitter_' + uuid, 'error:' + response.statusCode);
+		response.destroy();
+		return;
+	}
+
+	response.setEncoding('utf8');
+	response.on('data', (chunk) => {
+		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
+	});
+	response.on('end', () => {
+		var results = querystring.parse(buffer.toString('utf8'));
+		console.timeEnd(uuid);
+		console.log(results);
+//		try {
+//			if (results['oauth_callback_confirmed'] !== 'true') {
+//				throw new TypeError('Twitter oauth_callback_confirmed not true!');
+//			}
+//			keyvalue.set('login_twitter_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
+//		} catch (err) {
+//			keyvalue.set('login_twitter_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
+//			return;
+//		}
+	});
+});
+request.on('error', (e) => {
+	console.log(`Problem with request: ${e.message}`);
+});
+request.write(querystring.stringify(params));
+request.end();
 
 
 

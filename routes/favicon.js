@@ -11,6 +11,7 @@ exports.register = (endpoints, shared_data) => {
 
 res.setHeader('Content-Type', 'image/x-icon');
 res.write(ico);
+res.end();
 
 
 
@@ -27,6 +28,7 @@ res.write(ico);
 
 res.setHeader('Content-Type', 'image/png');
 res.write(png);
+res.end();
 
 
 
@@ -43,6 +45,7 @@ res.write(png);
 
 res.setHeader('Content-Type', 'image/png');
 res.write(apple);
+res.end();
 
 
 
