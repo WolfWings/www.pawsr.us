@@ -12,20 +12,23 @@ var status;
 
 var refresh = false;
 data.services.forEach((x) => {
+	var service = x.name.toLowerCase();
+
 	try {
-		status = keyvalue.get('login_' + x.name.toLowerCase() + '_' + data.session[x.name.toLowerCase() + '_uuid']);
+		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
 	} catch (err) {
 		status = null;
 	}
+
 	if (status !== null) {
 		if (status.startsWith('ready:')) {
 			status = status.split(':');
-			keyvalue.delete('login_' + x.name.toLowerCase() + '_' + data.session[x.name.toLowerCase() + '_uuid']);
-			delete data.session[x.name.toLowerCate()' + '_uuid'];
-			if (typeof data.session[x.name.toLowerCase()] === 'undefined') {
-				data.session[x.name.toLowerCase()] = [];
+			keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
+			delete data.session[service + '_uuid'];
+			if (typeof data.session[service] === 'undefined') {
+				data.session[service] = [];
 			}
-			data.session[x.name.toLowerCase()].push({
+			data.session[service].push({
 				uid: status[1]
 			,	name: status[2]
 			});
@@ -46,9 +49,10 @@ res.write(data.boilerplate.prebody);
 res.write('<p>Add/Verify Login</p>');
 res.write('<ul>');
 data.services.forEach((x) => {
+	var service = x.name.toLowerCase();
 
 	try {
-		status = keyvalue.get('login_' + x.name.toLowerCase() + '_' + data.session[x.name.toLowerCase() + '_uuid']);
+		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
 	} catch (err) {
 		status = null;
 	}
@@ -64,7 +68,7 @@ data.services.forEach((x) => {
 		res.write(' title=\x22' + status.split(':')[2] + '\x22');
 	}
 	res.write('\x22>' + x.name + '</a>');
-	if (data.session.hasOwnProperty(x.name.toLowerCase() + '_uuid')) {
+	if (data.session.hasOwnProperty(service + '_uuid')) {
 		res.write('<br><p><b>Status:</b> ' + status + '</p>');
 	}
 	res.write('</li>');

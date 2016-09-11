@@ -1,39 +1,11 @@
-const fs = require('fs');
-const path = require('path');
 const http = require('http');
+const crypto = require('crypto');
 
-// Shared 'global' data for all routes/endpoints
-//
-// While generally frowned upon, this is the cleanest way to allow segmented
-// addition of additional services supported, and other modular additions.
-var shared_data_build = {
-	services: []
-};
-
-// Endpoints uses the following structure:
-//	uri: NON-REGEX uri to match against, including leading /
-//	routine: Function called w/ (data, res) parameters
-//
-// Use a recursive loader to load in all the routes to keep things tidy
-//
-// Each file called MUST have a 'register' function that takes the endpoints
-// array as a parameter, and updates the array however it sees fit. Usually
-// this will be via a simple .push() call adding it's two-entry object, but
-// it is left open in case alternative approaches become required.
-var endpoints = [];
-fs.readdirSync(path.join(__dirname, 'routes')).forEach((file) => {
-	// Only load .js files in the directory non-recursively
-	if (fs.statSync('./routes/' + file).isFile()
-	 && (path.extname(file) === '.js')
-	   ) {
-		require('./routes/' + file).register(endpoints, shared_data_build);
-	}
-});
-
-// Archive the shared_data into JSON format to avoid the per-request
-// JSON.stringify call in the object-->JSON-->object cloning process.
-const shared_data = JSON.stringify(shared_data_build);
-delete shared_data_build;
+// Load the routes details
+var routes = require('./routes');
+const shared_data = routes.shared_data;
+const endpoints = routes.endpoints;
+delete routes;
 
 //
 // Build the HTTP listener server
@@ -94,8 +66,8 @@ server.on('request', (raw, res) => {
 	var session = {};
 	if (cookies.hasOwnProperty('session')) {
 		try {
-		var decoded = aead.decrypt(cookies['session'], server_key);
-			session = JSON.parse(decoded);
+			var decoded = aead.decrypt(cookies['session'], server_key);
+			session = JSON.parse('{' + decoded.slice(32, -32) + '}');
 		} catch (e) {
 			console.log(e);
 			console.log(cookies.session);
@@ -107,9 +79,12 @@ server.on('request', (raw, res) => {
 	// Utility DRY function for storing an updated session-state
 	// Note that this must be called manually IF saving changes!
 	res.saveSession = (session) => {
-		var sessioncookie = '';
+		var sessioncookie =
+			crypto.randomBytes(24).toString('base64')
+		+	JSON.stringify(session).slice(1, -1)
+		+	crypto.randomBytes(24).toString('base64');
 		try {
-			sessioncookie = aead.encrypt(JSON.stringify(session), server_key);
+			sessioncookie = aead.encrypt(sessioncookie, server_key);
 		} catch (e) {
 			console.log(e);
 			console.log(session);
