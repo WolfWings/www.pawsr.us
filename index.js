@@ -97,7 +97,7 @@ server.on('request', (raw, res) => {
 		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
-	console.time(uri);
+	process.stdout.write('.');
 	tempdata = JSON.parse(shared_data);
 	tempdata.query = parsedurl.query;
 	tempdata.session = session;
@@ -106,7 +106,7 @@ server.on('request', (raw, res) => {
 	if (res.finished !== true) {
 		res.end();
 	}
-	console.timeEnd(uri);
+	process.stdout.write('\b \b');
 });
 
 // Finally select a listening port
