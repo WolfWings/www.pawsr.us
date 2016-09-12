@@ -5,33 +5,37 @@
 // entire application in NASM first.
 
 const fs = require('fs');
-const path = require('path');
 const crypto = require('crypto');
 
-// Requires a './keyvalue/[0-9a-f]/[0-9a-f]/ directory structure to exist
-// This is a very minimalistic approach:
-//	Try to blindly create the entire tree.
-//	If we get any EEXIST error, assume the tree exists already.
-try {
-	fs.mkdirSync('./keyvalue');
-	'0123456789abcdef'.split('').forEach((first) => {
-		fs.mkdirSync('./keyvalue/' + first);
-		'0123456789abcdef'.split('').forEach((second) => {
-			fs.mkdirSync('./keyvalue/' + first + '/' + second);
-		});
-	});
-} catch (err) {
-	if (err.code !== 'EEXIST') {
-		throw err;
+// A terse wrapper function to ignore 'EEXIST' errors on the fs.mydirSync call
+function mkdirSafe(dir) {
+	try {
+		fs.mkdirSync(dir);
+	} catch (err) {
+		if (err.code !== 'EEXIST') {
+			throw err;
+		}
 	}
 }
+
+// Requires a './keyvalue/[0-9a-f]/[0-9a-f]/ directory structure to exist
+// This is a very minimalistic approach, just blindly create the entire tree.
+
+console.log('Creating key-value storage');
+mkdirSafe('./keyvalue');
+'0123456789abcdef'.split('').forEach((first) => {
+	mkdirSafe('./keyvalue/' + first);
+	'0123456789abcdef'.split('').forEach((second) => {
+		mkdirSafe('./keyvalue/' + first + '/' + second);
+	});
+});
 
 var purged = false;
 function exitHandler(options, err) {
 	if (purged === false) {
 		purged = true;
 		if (err) console.log(err.stack);
-		console.log('Purging keyvalues');
+		console.log('Purging key-value storage');
 		'0123456789abcdef'.split('').forEach((first) => {
 			'0123456789abcdef'.split('').forEach((second) => {
 				fs.readdirSync('./keyvalue/' + first + '/' + second + '/').forEach((file) => {
@@ -57,7 +61,6 @@ function safeKey(key) {
 	hash.update(key);
 	digest = hash.digest('hex');
 	digest = digest.slice(0,1) + '/' + digest.slice(1,2) + '/' + digest.slice(2);
-//	console.log(key + ' ~= ' + digest);
 	return digest;
 };
 
