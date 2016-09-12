@@ -8,22 +8,22 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-var stats;
+// Requires a './keyvalue/[0-9a-f]/[0-9a-f]/ directory structure to exist
+// This is a very minimalistic approach:
+//	Try to blindly create the entire tree.
+//	If we get any EEXIST error, assume the tree exists already.
 try {
-	stats = fs.statSync('./keyvalue');
+	fs.mkdirSync('./keyvalue');
+	'0123456789abcdef'.split('').forEach((first) => {
+		fs.mkdirSync('./keyvalue/' + first);
+		'0123456789abcdef'.split('').forEach((second) => {
+			fs.mkdirSync('./keyvalue/' + first + '/' + second);
+		});
+	});
 } catch (err) {
-	stats = err;
-}
-
-if (stats instanceof Error) {
-	if (stats.code === 'ENOENT') {
-		fs.mkdirSync('./keyvalue');
-		stats = fs.statSync('./keyvalue');
-	} else {
-		throw stats;
+	if (err.code !== 'EEXIST') {
+		throw err;
 	}
-} else if (stats.isDirectory() === false) {
-	throw Error('keyvalue exists, but is not a directory!');
 }
 
 var purged = false;
@@ -32,10 +32,16 @@ function exitHandler(options, err) {
 		purged = true;
 		if (err) console.log(err.stack);
 		console.log('Purging keyvalues');
-		fs.readdirSync('./keyvalue/').forEach((file) => {
-//			console.log(file);
-			fs.unlinkSync('./keyvalue/' + file);
+		'0123456789abcdef'.split('').forEach((first) => {
+			'0123456789abcdef'.split('').forEach((second) => {
+				fs.readdirSync('./keyvalue/' + first + '/' + second + '/').forEach((file) => {
+					fs.unlinkSync('./keyvalue/' + first + '/' + second + '/' + file);
+				});
+				fs.rmdirSync('./keyvalue/' + first + '/' + second);
+			});
+			fs.rmdirSync('./keyvalue/' + first);
 		});
+		fs.rmdirSync('./keyvalue');
 		if (options.exit) process.exit();
 	}
 }
@@ -50,6 +56,7 @@ function safeKey(key) {
 	var hash = crypto.createHash('sha256');
 	hash.update(key);
 	digest = hash.digest('hex');
+	digest = digest.slice(0,1) + '/' + digest.slice(1,2) + '/' + digest.slice(2);
 //	console.log(key + ' ~= ' + digest);
 	return digest;
 };
