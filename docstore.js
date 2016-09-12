@@ -73,25 +73,30 @@ exports.delete = (key) => {
 	});
 }
 
-exports.lock = (key) => {
-	var trueKey = safeKey(key);
-	var unique = crypto.randomBytes(4).toString('hex');
-	try {
-		fs.symlinkSync('./docstore/' + trueKey, './docstore/' + trueKey + '.lock');
-		fs.symlinkSync('./docstore/' + trueKey, './docstore/' + trueKey + '.lock.' + unique);
-		return unique;
-	} catch (err) {
-		return null;
-	}
-}
+var lockCounter = 0;
 
 exports.unlock = (key, unique) => {
 	var trueKey = safeKey(key);
+	var uniqueInt = parseInt(unique, 36);
 	try {
 		fs.unlink('./docstore/' + trueKey + '.lock.' + unique);
 		fs.unlink('./docstore/' + trueKey + '.lock');
 		return true;
 	} catch (err) {
 		return false;
+	}
+}
+
+exports.lock = (key) => {
+	var trueKey = safeKey(key);
+	var unique = lockCounter.toString(36);
+	lockCounter = lockCounter + 1;
+
+	try {
+		fs.symlinkSync('./docstore/' + trueKey, './docstore/' + trueKey + '.lock');
+		fs.symlinkSync('./docstore/' + trueKey, './docstore/' + trueKey + '.lock.' + unique);
+		return unique;
+	} catch (err) {
+		return null;
 	}
 }
