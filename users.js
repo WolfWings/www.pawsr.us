@@ -1,9 +1,9 @@
 const docstore = require('./docstore.js');
 
-exports.loginsuccess = (service, uid, name) {
-	var locks = {};
-	locks['users'] = docstore.lock('users');
-	if (locks['users'] === null) {
+exports.loginsuccess = (service, uid, name) => {
+	var lock = null;
+	lock = docstore.lock('users');
+	if (lock === null) {
 		return null;
 	}
 	var users = docstore.get('users');
@@ -32,4 +32,7 @@ exports.loginsuccess = (service, uid, name) {
 		})
 		user = 0;
 	}
+	docstore.set('users', users);
+	docstore.unlock('users', lock);
+	return users.data[user].uid;
 }

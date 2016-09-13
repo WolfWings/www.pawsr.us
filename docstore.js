@@ -48,7 +48,7 @@ exports.set = (key, value) => {
 	// Unsafe to use fs.writeFile without waiting for the callback
 	// So we're stuck with the sync version for this use-case
 	try {
-		fs.writeFileSync('./docstore/' + trueKey, value);
+		fs.writeFileSync('./docstore/' + trueKey, JSON.stringify(value, null, 1));
 	} catch (err) {
 		return;
 	}
@@ -58,7 +58,7 @@ exports.get = (key) => {
 	var value = null;
 	var trueKey = safeKey(key);
 	try {
-		value = fs.readFileSync('./docstore/' + trueKey).toString('utf8');
+		value = JSON.parse(fs.readFileSync('./docstore/' + trueKey).toString('utf8'));
 	} catch (err) {
 		value = null;
 	}

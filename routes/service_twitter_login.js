@@ -9,7 +9,6 @@ exports.register = (endpoints, shared_data) => {
 const querystring = require('querystring');
 const https = require('https');
 
-const
 const keyvalue = require('../keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 const users = require('../users.js');
@@ -92,7 +91,7 @@ res.end();
 function loginsuccess(uuid, results) {
 	var internal_uid;
 	try {
-		internal_uid = users.loginsuccess('twitter, results.user_id, results.screen_name);
+		internal_uid = users.loginsuccess('twitter', results.user_id, results.screen_name);
 		if (internal_uid === null) {
 			setImmediate(loginsuccess, uuid, results);
 		}

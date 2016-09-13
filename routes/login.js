@@ -37,14 +37,13 @@ data.services.forEach((x) => {
 		}
 	}
 });
-if (refresh === true) {
-	res.write(util.refresh(1, '/login'));
-}
 
 res.saveSession(data.session);
 res.write(data.boilerplate.pretitle);
 res.write('<title>Login - www.pawsr.us</title>');
-
+if (refresh === true) {
+	res.write(util.refresh(1, '/login'));
+}
 res.write(data.boilerplate.prebody);
 res.write('<p>Add/Verify Login</p>');
 res.write('<ul>');
