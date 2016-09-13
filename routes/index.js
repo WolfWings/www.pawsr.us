@@ -15,10 +15,10 @@ var shared_data = {
 //
 // Use a recursive loader to load in all the routes to keep things tidy
 //
-// Each file called MUST have a 'register' function that takes the endpoints
-// array as a parameter, and updates the array however it sees fit. Usually
-// this will be via a simple .push() call adding it's two-entry object, but
-// it is left open in case alternative approaches become required.
+// Each file called export have a 'register' function that takes the data &
+// endpoints arrays as parameters, and updates the arrays however it wants.
+// Usually this will be via a simple .push() call adding it's entry, but it
+// is left open in case alternative approaches become required.
 var endpoints = [];
 fs.readdirSync(__dirname).forEach((file) => {
 	// Only load .js files in the directory non-recursively

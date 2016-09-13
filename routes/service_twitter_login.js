@@ -9,8 +9,10 @@ exports.register = (endpoints, shared_data) => {
 const querystring = require('querystring');
 const https = require('https');
 
+const
 const keyvalue = require('../keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
+const users = require('../users.js');
 const util = require('../util.js');
 
 try {
@@ -85,6 +87,22 @@ res.saveSession(data.session);
 res.setHeader('Location', '/login');
 res.end();
 
+// Separate function to simplify placing us back on the event loop
+// Best way to handle locks for now, simply try again later!
+function loginsuccess(uuid, results) {
+	var internal_uid;
+	try {
+		internal_uid = users.loginsuccess('twitter, results.user_id, results.screen_name);
+		if (internal_uid === null) {
+			setImmediate(loginsuccess, uuid, results);
+		}
+		results = 'ready:' + internal_uid;
+	} catch (err) {
+		results = 'error:Failure to get proper auth token from twitter!';
+	}
+	keyvalue.set(uuid, results);
+}
+
 var request = https.request(url, (response) => {
 	var buffer = Buffer.alloc(0);
 	if (response.statusCode !== 200) {
@@ -98,12 +116,7 @@ var request = https.request(url, (response) => {
 		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 	});
 	response.on('end', () => {
-		var results = querystring.parse(buffer.toString('utf8'));
-		try {
-			keyvalue.set(uuid, 'ready:' + results.user_id + ':' + results.screen_name);
-		} catch (err) {
-			keyvalue.set(uuid, 'error:Failure to get proper auth token from twitter!');
-		}
+		loginsuccess(uuid, querystring.parse(buffer.toString('utf8')));
 	});
 });
 request.on('error', (e) => {
