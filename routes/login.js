@@ -11,34 +11,39 @@ const util = require('../util.js');
 var status;
 
 var refresh = false;
+var updatesession = false;
 data.services.forEach((x) => {
 	var service = x.name.toLowerCase();
 
-	try {
-		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
-	} catch (err) {
+	if (typeof data.session[service + '_uuid'] === 'undefined') {
 		status = null;
+	} else {
+		try {
+			status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
+			if (status === null) {
+				delete data.session[service + '_uuid'];
+				updatesession = true;
+				refresh = true;
+			}
+		} catch (err) {
+			status = null;
+		}
 	}
 
 	if (status !== null) {
 		if (status.startsWith('ready:')) {
 			status = status.split(':');
-			keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
-			delete data.session[service + '_uuid'];
-			if (typeof data.session[service] === 'undefined') {
-				data.session[service] = [];
-			}
-			data.session[service].push({
-				uid: status[1]
-			,	name: status[2]
-			});
+			console.log(status);
+			// TODO: Create/Add user account
 		} else {
 			refresh = true;
 		}
 	}
 });
 
-res.saveSession(data.session);
+if (updatesession) {
+	res.saveSession(data.session);
+}
 res.write(data.boilerplate.pretitle);
 res.write('<title>Login - www.pawsr.us</title>');
 if (refresh === true) {
@@ -50,10 +55,14 @@ res.write('<ul>');
 data.services.forEach((x) => {
 	var service = x.name.toLowerCase();
 
-	try {
-		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
-	} catch (err) {
+	if (typeof data.session[service + '_uuid'] === 'undefined') {
 		status = null;
+	} else {
+		try {
+			status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
+		} catch (err) {
+			status = null;
+		}
 	}
 	if (status === null) {
 		status = '';
@@ -73,6 +82,9 @@ data.services.forEach((x) => {
 	res.write('</li>');
 });
 res.write('</ul>');
+res.write('<pre>');
+res.write(JSON.stringify(data.session, null, 4));
+res.write('</pre>');
 res.write(data.boilerplate.postbody);
 res.end();
 

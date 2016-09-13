@@ -1,3 +1,11 @@
+const querystring = require('querystring');
+const https = require('https');
+
+const docstore = require('../docstore.js');
+const keyvalue = require('../keyvalue.js');
+const secrets = require('../secrets.js').services.twitter;
+const util = require('../util.js');
+
 exports.register = (endpoints, shared_data) => {
 	console.log('Registering /login/twitter');
 	endpoints.push({
@@ -5,14 +13,6 @@ exports.register = (endpoints, shared_data) => {
 	,	routine: (data, res) => {
 
 
-
-const querystring = require('querystring');
-const https = require('https');
-
-const keyvalue = require('../keyvalue.js');
-const secrets = require('../secrets.js').services.twitter;
-const users = require('../users.js');
-const util = require('../util.js');
 
 try {
 	if (data.query.state !== data.session.twitter_uuid) {
@@ -86,22 +86,6 @@ res.saveSession(data.session);
 res.setHeader('Location', '/login');
 res.end();
 
-// Separate function to simplify placing us back on the event loop
-// Best way to handle locks for now, simply try again later!
-function loginsuccess(uuid, results) {
-	var internal_uid;
-	try {
-		internal_uid = users.loginsuccess('twitter', results.user_id, results.screen_name);
-		if (internal_uid === null) {
-			setImmediate(loginsuccess, uuid, results);
-		}
-		results = 'ready:' + internal_uid;
-	} catch (err) {
-		results = 'error:Failure to get proper auth token from twitter!';
-	}
-	keyvalue.set(uuid, results);
-}
-
 var request = https.request(url, (response) => {
 	var buffer = Buffer.alloc(0);
 	if (response.statusCode !== 200) {
@@ -128,4 +112,17 @@ request.end();
 
 		}
 	});
+}
+
+// Separate function to simplify placing us back on the event loop
+// Only way to handle locks for now, simply try again later!
+function loginsuccess(uuid, results) {
+	var response;
+	try {
+		docstore.set('account_twitter_' + results.user_id, results.screen_name);
+		response = 'ready:' + results.user_id;
+	} catch (err) {
+		response = 'error:Invalid response from Twitter. Please try again later.';
+	}
+	keyvalue.set(uuid, response);
 }

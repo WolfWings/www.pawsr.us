@@ -63,11 +63,14 @@ server.on('request', (raw, res) => {
 	});
 
 	// Now we process the session cookie if needed, using AEAD
+	// Note the 9-character padding is due to the base64base64
+	// effective encoding. It adds 16 characters to both ends.
 	var session = {};
-	if (cookies.hasOwnProperty('session')) {
+	if (typeof cookies['session'] !== 'undefined') {
 		try {
-			var decoded = aead.decrypt(cookies['session'], server_key);
-			session = JSON.parse('{' + decoded.slice(32, -32) + '}');
+			var decoded = '{' + aead.decrypt(cookies['session'], server_key).slice(12, -12) + '}';
+			console.log('Session: ' + decoded);
+			session = JSON.parse(decoded);
 		} catch (e) {
 			console.log(e);
 			console.log(cookies.session);
@@ -80,9 +83,9 @@ server.on('request', (raw, res) => {
 	// Note that this must be called manually IF saving changes!
 	res.saveSession = (session) => {
 		var sessioncookie =
-			crypto.randomBytes(24).toString('base64')
+			crypto.randomBytes(9).toString('base64')
 		+	JSON.stringify(session).slice(1, -1)
-		+	crypto.randomBytes(24).toString('base64');
+		+	crypto.randomBytes(9).toString('base64');
 		try {
 			sessioncookie = aead.encrypt(sessioncookie, server_key);
 		} catch (e) {
