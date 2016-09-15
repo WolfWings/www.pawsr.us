@@ -1,9 +1,100 @@
 Session State:
 
-userid: <integer, authenticated internal userid>
-login.<service>: 
+userid: <authenticated internal uuid>
 
-Direct HREF to login URLs, skip one redirect
+
+
+/initlogin/<service>	Support URL for oauth1-based login mechanisms
+
+	If '${service}_uuid' session variable does NOT exist:
+		Generate UUID
+
+		Set '${service}_uuid_${UUID}' keyvalue to 'wip'
+
+		Set '${service}_uuid' session variable to UUID
+
+	307-Redirect to '/preauth/${service}'
+
+/preauth/<service>	'Holding tank' URL for oauth1-based login mechanisms
+
+	If '${service}_uuid' session variables does NOT exist:
+		307-Redirect to '/initlogin/${service}'
+
+	If '${service}_uuid_${UUID}' keyvalue DOESN'T exist:
+		Possible replay attack attempt, BOOT!
+
+		Delete '${service}_uuid' session variable
+
+		307-Redirect to '/'
+
+	Check status of '${service}_uuid_${UUID}' keyvalue:
+		'wip'
+			Meta-refresh to myself w/ 1-second delay
+
+		'error:'
+		default
+			Delete '${service}_uuid_${UUID}' keyvalue
+
+			Delete '${service}_uuid' session variable
+
+			Present error page w/ click to homepage
+
+		'ready:'
+			Store session variables for service-specific values
+
+			307-Redirect to calculated ${login_URL}
+
+
+
+/login/<service>	Return callback for each service
+
+	Verify required parameters in session and request exist and sync.
+
+	If anything is missing/broken, error page and WAIT for client to click.
+
+	Delete unrequired session variables
+
+	Set keyvalue 'login_${service}_${uuid}' to 'wip' state
+
+	Redirect client to '/login'
+
+	Begin processing request
+
+	On request error or request response lacking required elements...
+		Update keyvalue to 'error:${error_message}'
+
+	...otherwise...
+		Process login including merging accounts if needed
+
+		Update keyvalue to 'ready:${userid}'
+
+
+
+/login			Main login endpoint
+
+	List servics supported
+
+	If 'login_${service}' session value exists:
+
+		Store as UUID
+
+		Check status of 'login_${service}_${uuid}' keyvalue:
+
+		'wip'
+			Set 'processing' flag on login-icon
+			Disable link
+			Set meta-refresh for 1 second to /login
+
+		'error:'
+			Set 'error' flag on login-icon
+			Link to specific error/troubleshooting page
+
+		'ready:'
+			Delete keyvalue
+			Set 'userid' session variable to attached value
+
+
+
 /			Main Homepage
 	If logged out:
 		Describe website
@@ -11,78 +102,3 @@ Direct HREF to login URLs, skip one redirect
 	Provide links to sub-systems:
 		Login Management (link to /login)
 		Profile Management (link to /profile)
-
-/login			Main login endpoint
-
-	List servics supported
-
-	For all services:
-		If 'login.${service}' exists:
-			Check status
-
-			If 'waiting' status:
-				NoJS Meta-refresh to myself
-				Add CSS for 'pinwheel' state to icon
-				Link: Disabled
-				JavaScript:
-					Disable meta-refresh
-					AJAX to /ajax/login-status on constant loop
-
-			If 'error' status:
-				Delete cookie
-				Create 'error_${service}' cookie w/ error code
-				Add CSS for 'error' state to icon
-				Link: Leads to /errors/<service>/<error code>
-
-			If 'just added' status:
-				Delete cookie
-				Add CSS for 'new addition' state to icon
-				Mark service as a whole as 'verified' for this session
-				Link: Leads to /services/<service>/<service-specific-UID>
-
-			If 'verified' status:
-				Delete cookie
-				Add CSS for 'verified' state to icon
-				Mark service as a whole as 'verified' for this session
-				Mark service-specific-UID as 'logged in' for this session
-				Link: Leads to /services/<service>/<service-specific-UID>
-
-		If 'login.${service}' does NOT exist:
-
-			Link: Leads to /services/<service>/<service-specific-UID>
-
-			If 'service.${service}' exists on this session:
-				If ssUID matches 'service.${service}' then:
-					Add CSS for 'verified' state to icon
-				If ssUID does NOT match 'service.${service}' then:
-					Add 'cannot click' state to icon
-
-		Default:
-			Add CSS for 'add/login' state to icon
-			Link: Leads to service-specific login URL
-
-/prelogin/<service>	Support URL for oauth1-based login mechanisms
-
-	Create UUID
-
-	Set 'prelogin_${service}_${UUID}' key on memcached to 'in progress'
-
-	Set 'prelogin_${service}' session variable to UUID
-
-	NoJS Meta-refresh to myself
-
-	JS queries /ajax/prelogin/${service} on constant loop instead
-
-/login/<service>	Return callback for each service
-
-	Set 'service_${service}' session variable
-
-	Set memcache value for '${session}:${service}' to 'Processing' state
-
-	Redirect client to '/login'
-
-	Begin processing request
-
-	On completion, update memcache value
-
-	If result is successful, update database

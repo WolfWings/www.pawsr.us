@@ -42,6 +42,18 @@ try {
 	return;
 }
 
+var uuid = 'login_twitter_' + data.session.twitter_uuid;
+keyvalue.set(uuid, 'wip');
+delete(data.session.twitter_token);
+delete(data.session.twitter_token_secret);
+
+res.statusCode = 307;
+res.saveSession(data.session);
+res.setHeader('Location', '/login');
+res.end();
+
+
+
 var params = {
 	oauth_consumer_key:     secrets.oauthConsumerKey
 ,	oauth_nonce:            util.nonce()
@@ -76,16 +88,6 @@ var url = {
 	}
 };
 
-var uuid = 'login_twitter_' + data.session.twitter_uuid;
-keyvalue.set(uuid, 'wip');
-delete(data.session.twitter_token);
-delete(data.session.twitter_token_secret);
-
-res.statusCode = 307;
-res.saveSession(data.session);
-res.setHeader('Location', '/login');
-res.end();
-
 var request = https.request(url, (response) => {
 	var buffer = Buffer.alloc(0);
 	if (response.statusCode !== 200) {
@@ -99,10 +101,16 @@ var request = https.request(url, (response) => {
 		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 	});
 	response.on('end', () => {
-		loginsuccess(uuid, querystring.parse(buffer.toString('utf8')));
+		try {
+			response = 'ready:' + results.user_id + ':' + results.screen_name + ':https:\x2F/twitter.com/' + results.screen_name;
+		} catch (err) {
+			response = 'error:Invalid response from Twitter.';
+		}
+		keyvalue.set(uuid, response);
 	});
 });
 request.on('error', (e) => {
+	keyvalue.set(uuid, 'error:Twitter API request failure.');
 	console.log(`Problem with request: ${e.message}`);
 });
 request.write(querystring.stringify(params));
@@ -112,17 +120,4 @@ request.end();
 
 		}
 	});
-}
-
-// Separate function to simplify placing us back on the event loop
-// Only way to handle locks for now, simply try again later!
-function loginsuccess(uuid, results) {
-	var response;
-	try {
-		docstore.set('account_twitter_' + results.user_id, results.screen_name);
-		response = 'ready:' + results.user_id;
-	} catch (err) {
-		response = 'error:Invalid response from Twitter. Please try again later.';
-	}
-	keyvalue.set(uuid, response);
 }
