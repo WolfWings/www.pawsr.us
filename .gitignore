@@ -1,3 +1,4 @@
 secrets.js
 docstore/
 keyvalue/
+node_modules/

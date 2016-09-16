@@ -4,6 +4,25 @@ userid: <authenticated internal uuid>
 
 
 
+User list: users
+	[	<UUID>: <UUID> // Remapped UUID
+	...
+	,	<UUID>: null // valid UUID
+	]
+
+User profile structure: user_<UUID>
+	mergedto:	<new UUID> // All other records removed.
+	services: [
+		{	service: 'twitter'
+		,	uid: <opaque service-specific blob>
+		,	name: <name on service>
+		,	url: <url to profile>
+		}
+	]
+
+
+
+
 /initlogin/<service>	Support URL for oauth1-based login mechanisms
 
 	If '${service}_uuid' session variable does NOT exist:
