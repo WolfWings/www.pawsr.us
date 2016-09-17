@@ -7,6 +7,9 @@ const shared_data = routes.shared_data;
 const endpoints = routes.endpoints;
 delete routes;
 
+// Build the database connection at the central level
+var database = require('./database.js');
+
 //
 // Build the HTTP listener server
 //
@@ -99,6 +102,8 @@ server.on('request', (raw, res) => {
 	res.deleteSession = () => {
 		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
+
+	res.db = database;
 
 //	process.stdout.write('.');
 	console.time(uri);
