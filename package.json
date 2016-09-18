@@ -1,9 +1,12 @@
 {
-  "name": "www.pawsr.us"
-, "version": "0.0.1"
-, "description": "www.pawsr.us website"
-, "main": "index.js"
-, "author": "Wolf <wolfwings@gmail.com>"
-, "license": "UNLICENSED"
-, "private": true
+  "name": "www.pawsr.us",
+  "version": "0.0.1",
+  "description": "www.pawsr.us website",
+  "main": "index.js",
+  "author": "Wolf <wolfwings@gmail.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "mysql": "^2.11.1"
+  }
 }

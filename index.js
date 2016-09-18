@@ -103,9 +103,8 @@ server.on('request', (raw, res) => {
 		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
-	res.db = database;
+	res.database = database;
 
-//	process.stdout.write('.');
 	console.time(uri);
 	tempdata = JSON.parse(shared_data);
 	tempdata.query = parsedurl.query;
@@ -115,7 +114,6 @@ server.on('request', (raw, res) => {
 	if (res.finished !== true) {
 		res.end();
 	}
-//	process.stdout.write('\b \b');
 	console.timeEnd(uri);
 });
 
