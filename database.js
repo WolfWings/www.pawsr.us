@@ -47,10 +47,21 @@ const schema_updates = {
 		 +	')'
 		,	'UPDATE versioning SET complete = "yes" WHERE record = "0.0.0"'
 	]
+,	'0.0.twitter': [
+		'INSERT INTO services'
+	 +	' SET title="Twitter", url_format="https:\x2F/twitter.com/%s", class="twitter", login="yes", internaldisplay=""'
+	]
 };
 
+		 +	'_services BIGINT UNSIGNED PRIMARY KEY'
+		 +	',title VARCHAR(255) UNIQUE NOT NULL'
+		 +	',url_format VARCHAR(255) NOT NULL'
+		 +	',class VARCHAR(255) UNIQUE NOT NULL'
+		 +	',login ENUM("yes") NOT NULL'
+		 +	',internaldisplay ENUM("yes") NOT NULL'
+
+
 var send_updates = (conn, records, index) => {
-	console.trace('send_updates');
 	if (records.length < 1) {
 		conn.release();
 		return;
