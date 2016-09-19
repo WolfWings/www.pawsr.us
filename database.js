@@ -42,7 +42,7 @@ const schema_updates = {
 	 +	',_services BIGINT UNSIGNED'
 	 +	',screen_name VARCHAR(255) CHARACTER SET "utf8mb4" DEFAULT NULL'
 	 +	',identifier TINYBLOB'
-	 +	',UNIQUE INDEX `record` (_users, _services, identifier(255))'
+	 +	',UNIQUE INDEX `record` (_services, identifier(255))'
 	 +	',FOREIGN KEY (`_services`) REFERENCES `services`(`_services`) ON DELETE CASCADE ON UPDATE CASCADE'
 	 +	',FOREIGN KEY (`_users`) REFERENCES `users`(`_users`) ON DELETE CASCADE ON UPDATE CASCADE'
 	 +	')'
