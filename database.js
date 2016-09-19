@@ -53,14 +53,6 @@ const schema_updates = {
 	]
 };
 
-		 +	'_services BIGINT UNSIGNED PRIMARY KEY'
-		 +	',title VARCHAR(255) UNIQUE NOT NULL'
-		 +	',url_format VARCHAR(255) NOT NULL'
-		 +	',class VARCHAR(255) UNIQUE NOT NULL'
-		 +	',login ENUM("yes") NOT NULL'
-		 +	',internaldisplay ENUM("yes") NOT NULL'
-
-
 var send_updates = (conn, records, index) => {
 	if (records.length < 1) {
 		conn.release();
