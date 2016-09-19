@@ -51,7 +51,27 @@ exports.JSONreviver = (key, value) => {
 	}
 };
 
-exports.complete_login = (database, login_id, service, uuid, user_id, screen_name, custom_url) => {
+// This is a successful 'login' here
+// Goal: If user_id is set, that is where everything will be 'merged to'
+//
+// Lookup service-specific identifier:
+// If NOT found:
+//   If user_id is undefined:
+//     Generate unique user_id
+//   Create new record
+//   Return user_id
+// If found:
+//   If user_id is undefined:
+//     Set user_id to found record's user_id
+//   If user_id does not match found record's user_id:
+//     Begin Transaction
+//     Alter service_info records to point to new user_id
+//     Alter contact_pages records to point to new user_id
+//     Commit Transaction
+//   Update screen_name
+// Return user_id
+
+exports.complete_login = (database, user_id, service, uuid, unique_id, screen_name) => {
 	console.log(`Complete Login:\n\tLogin ID: ${login_id}\n\tService: ${service}\n\tUUID: ${uuid}\n\tUser ID: ${user_id}\n\tScreen Name: ${screen_name}\n\tCustom URL: ${custom_url}`);
 	var conn  = database.getConnection((err, conn) => {
 		if (err) {

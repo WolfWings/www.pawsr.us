@@ -24,7 +24,7 @@ const schema_updates = {
 	 +	')'
 	,	'INSERT INTO versioning'
 	 +	' SET record = "0.0.0", complete = ""'
-	 +	' ON DUPLICATE KEY UPDATE complete=""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
 	,	'CREATE TABLE IF NOT EXISTS users ('
 	 +	'_users BIGINT UNSIGNED PRIMARY KEY'
 	 +	')'
@@ -40,7 +40,7 @@ const schema_updates = {
 	 +	'_service_info BIGINT UNSIGNED PRIMARY KEY'
 	 +	',_users BIGINT UNSIGNED'
 	 +	',_services BIGINT UNSIGNED'
-	 +	',contact VARCHAR(255) CHARACTER SET "utf8mb4" DEFAULT NULL'
+	 +	',screen_name VARCHAR(255) CHARACTER SET "utf8mb4" DEFAULT NULL'
 	 +	',identifier TINYBLOB'
 	 +	',UNIQUE INDEX `record` (_users, _services, identifier(255))'
 	 +	',FOREIGN KEY (`_services`) REFERENCES `services`(`_services`) ON DELETE CASCADE ON UPDATE CASCADE'
@@ -55,18 +55,22 @@ const schema_updates = {
 	 +	',FOREIGN KEY (`_users`) REFERENCES `users`(`_users`) ON DELETE CASCADE ON UPDATE CASCADE'
 	 +	')'
 	,	'CREATE TABLE IF NOT EXISTS contact_entry ('
-	 +	'_ BIGINT UNSIGNED PRIMARY KEY'
-	 +	',_contact_pages BIGINT UNSIGNED'
+	 +	'_contact_pages BIGINT UNSIGNED'
 	 +	',_service_info BIGINT UNSIGNED'
-	 +	',UNIQUE INDEX `entries` (_contact_pages, _service_info)'
+	 +	',PRIMARY KEY (_contact_pages, _service_info)'
 	 +	',FOREIGN KEY (`_contact_pages`) REFERENCES `contact_pages`(`_contact_pages`) ON DELETE CASCADE ON UPDATE CASCADE'
 	 +	',FOREIGN KEY (`_service_info`) REFERENCES `service_info`(`_service_info`) ON DELETE CASCADE ON UPDATE CASCADE'
 	 +	')'
 	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.0.0"'
 	]
+
 ,	'0.0.twitter': [
-		'INSERT INTO services'
+		'INSERT INTO versioning'
+	 +	' SET record = "0.0.twitter", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'INSERT INTO services'
 	 +	' SET title="Twitter", url_format="https:\x2F/twitter.com/%s", class="twitter", login="yes", internaldisplay=""'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.0.twitter"'
 	]
 };
 
