@@ -94,9 +94,21 @@ exports.complete_login = (database, user_id, service, uuid, unique_id, screen_na
 
 			if (rows.length < 1) {
 				if (typeof user_id === 'undefined') {
-					console.log('TODO: Generate user_id via database.');
-					keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
-					conn.release();
+					conn.query(
+						'INSERT INTO _users'
+					 +	' VALUES()'
+					,	(err, result) => {
+						if (err) {
+							keyvalue.set(uuid, 'error:Database error!');
+							conn.release();
+							return;
+						}
+
+						user_id = result.insertID;
+						console.log('TODO: Create new service_info record.');
+						keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
+						conn.release();
+					});
 					return;
 				}
 				console.log('TODO: Create new service_info record.');
