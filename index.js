@@ -103,10 +103,14 @@ server.on('request', (raw, res) => {
 		}
 	}
 
+	// Utility function in case we need to nuke the session, mostly just for logout
+	// Centralized here to guarantee we only use one minimal and valid session value
+	// And yes, this key is valid. :)
 	res.deleteSession = () => {
 		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
+	// Provide access to the database
 	res.database = database;
 
 	console.time(uri);
