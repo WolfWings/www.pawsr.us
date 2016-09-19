@@ -9,7 +9,7 @@ const endpoints = routes.endpoints;
 delete routes;
 
 // Build the database connection at the central level
-var database = require('./database.js');
+global.database = require('./database.js');
 
 //
 // Build the HTTP listener server
@@ -111,7 +111,7 @@ server.on('request', (raw, res) => {
 	}
 
 	// Provide access to the database
-	res.database = database;
+	// res.database = database;
 
 	console.time(uri);
 	tempdata = JSON.parse(shared_data);

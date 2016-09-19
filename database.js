@@ -151,4 +151,4 @@ database.getConnection((err, conn) => {
 	});
 });
 
-exports = database;
+module.exports = database;

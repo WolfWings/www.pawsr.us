@@ -68,7 +68,7 @@ exports.set = (key, value) => {
 	var trueKey = safeKey(key);
 	// Unsafe to use fs.writeFile without waiting for the callback
 	// So we're stuck with the sync version for this use-case
-	console.log(`KeyValue: ${key} => ${value}`);
+//	console.log(`KeyValue: ${key} => ${value}`);
 	try {
 		fs.writeFileSync('./keyvalue/' + trueKey, value);
 	} catch (err) {
@@ -84,13 +84,13 @@ exports.get = (key) => {
 	} catch (err) {
 		value = null;
 	}
-	console.log(`KeyValue: ${key} <= ${value}`);
+//	console.log(`KeyValue: ${key} <= ${value}`);
 	return value;
 }
 
 exports.delete = (key) => {
 	var trueKey = safeKey(key);
-	console.log(`KeyValue: !${key}`);
+//	console.log(`KeyValue: !${key}`);
 	// THIS we can do async at least, huzzah!
 	fs.unlink('./keyvalue/' + trueKey, (err) => {
 		return;

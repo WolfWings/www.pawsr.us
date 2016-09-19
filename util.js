@@ -71,12 +71,8 @@ exports.JSONreviver = (key, value) => {
 //   Update screen_name
 // Return user_id
 
-exports.complete_login = (database, user_id, service, uuid, unique_id, screen_name) => {
-	console.log(`Complete Login:\n\tLogin ID: ${login_id}\n\tService: ${service}\n\tUUID: ${uuid}\n\tUser ID: ${user_id}\n\tScreen Name: ${screen_name}\n\tCustom URL: ${custom_url}`);
-	keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
-	return;
-
-	database.getConnection((err, conn) => {
+exports.complete_login = (user_id, service, uuid, unique_id, screen_name) => {
+	global.database.getConnection((err, conn) => {
 		if (err) { console.log(err); }
 
 		conn.query(
@@ -90,7 +86,15 @@ exports.complete_login = (database, user_id, service, uuid, unique_id, screen_na
 		,	(err, rows, fields) => {
 			if (err) { console.log(err); }
 
+			console.log('Complete Login:');
+			console.log('\tUser ID: ' + user_id);
+			console.log('\tService: ' + service);
+			console.log('\tUUID: ' + uuid);
+			console.log('\tUnique ID: ' + unique_id);
+			console.log('\tScreen Name: ' + screen_name);
+
 			console.log(rows);
+
 			keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
 			conn.release();
 			return;
