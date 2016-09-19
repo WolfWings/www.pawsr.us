@@ -1,3 +1,14 @@
+// Database foreign key structure
+//
+// +----------+   +--------------+   +---------------+
+// | services |<--| service_info |<--| contact_entry |
+// +----------+   +--------------+   +---------------+
+//                    |                  |
+//                    v                  v
+//                +-------+   +---------------+
+//                | users |<--| contact_pages |
+//                +-------+   +---------------+
+
 // Longer term: Migrate this to individual files
 // This structure works for now, but we need a better
 // implementation to avoid this file exploding in size
