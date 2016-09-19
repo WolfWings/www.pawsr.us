@@ -1,7 +1,6 @@
 const querystring = require('querystring');
 const https = require('https');
 
-const docstore = require('../docstore.js');
 const keyvalue = require('../keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 const util = require('../util.js');
@@ -101,12 +100,17 @@ var request = https.request(url, (response) => {
 		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 	});
 	response.on('end', () => {
-		try {
-			response = 'ready:' + results.user_id + ':' + results.screen_name + ':https:\x2F/twitter.com/' + results.screen_name;
-		} catch (err) {
-			response = 'error:Invalid response from Twitter.';
+		if (typeof results.user_id === 'undefined') {
+			keyvalue.set(uuid, 'error:No unique ID returned from Twitter.');
+			return;
 		}
-		keyvalue.set(uuid, response);
+
+		if (typeof results.screen_name === 'undefined') {
+			keyvalue.set(uuid, 'error:No screen name returned from Twitter.');
+			return;
+		}
+
+		util.complete_login('Twitter', uuid, results.user_id, results.screen_name, results.screen_name);
 	});
 });
 request.on('error', (e) => {
