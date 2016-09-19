@@ -35,7 +35,7 @@ data.services.forEach((x) => {
 			status = status.split(':');
 			console.log(status);
 			// TODO: Create/Add user account
-		} else {
+		} else if (status === 'wip') {
 			refresh = true;
 		}
 	}

@@ -27,27 +27,27 @@ exports.oauth1_signature = (method, url, params, key, token, hash) => {
 };
 
 exports.JSONreplacer = (key, value) => {
-	switch (typeof v) {
+	switch (typeof value) {
 		case 'number':
-			return ((v < 0) ? '-' : '+') + ('000000000000000' + Math.abs(v).toString(10)).slice(-15);
+			return ((value < 0) ? '-' : '+') + ('000000000000000' + Math.abs(value).toString(10)).slice(-15);
 		case 'string':
-			return '_'+ v;
+			return '_'+ value;
 		default:
-			return v;
+			return value;
 	}
 };
 
 exports.JSONreviver = (key, value) => {
-	if (typeof v !== 'string') {
-		return v;
+	if (typeof value !== 'string') {
+		return value;
 	}
-	switch (v.slice(0, 1)) {
+	switch (value.slice(0, 1)) {
 		case '-':
 		case '+':
-			return parseInt(v);
+			return parseInt(value);
 			break;
 		default:
-			return v.slice(1);
+			return value.slice(1);
 	}
 };
 
@@ -73,10 +73,12 @@ exports.JSONreviver = (key, value) => {
 
 exports.complete_login = (database, user_id, service, uuid, unique_id, screen_name) => {
 	console.log(`Complete Login:\n\tLogin ID: ${login_id}\n\tService: ${service}\n\tUUID: ${uuid}\n\tUser ID: ${user_id}\n\tScreen Name: ${screen_name}\n\tCustom URL: ${custom_url}`);
+	keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
+	return;
+
 	database.getConnection((err, conn) => {
-		if (err) {
-			throw err;
-		}
+		if (err) { console.log(err); }
+
 		conn.query(
 			'SELECT _users'
 		 +	' FROM service_info'
@@ -86,53 +88,12 @@ exports.complete_login = (database, user_id, service, uuid, unique_id, screen_na
 		 +	' AND identifier = ?'
 		,	[service, unique_id]
 		,	(err, rows, fields) => {
-			if (err) {
-				keyvalue.set(uuid, 'error:Database error!');
-				conn.release();
-				return;
-			}
+			if (err) { console.log(err); }
 
-			if (rows.length < 1) {
-				if (typeof user_id === 'undefined') {
-					conn.query(
-						'INSERT INTO _users'
-					 +	' VALUES()'
-					,	(err, result) => {
-						if (err) {
-							keyvalue.set(uuid, 'error:Database error!');
-							conn.release();
-							return;
-						}
-
-						user_id = result.insertID;
-						console.log('TODO: Create new service_info record.');
-						keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
-						conn.release();
-					});
-					return;
-				}
-				console.log('TODO: Create new service_info record.');
-				keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
-				conn.release();
-				return;
-			}
-
-			if (typeof user_id === 'undefined') {
-				user_id = rows[0]['_users'];
-			}
-
-			if (user_id !== rows[0]['_users']) {
-				console.log('TODO: Merge users');
-				keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
-				conn.release();
-				return;
-			}
-
-			console.log('TODO: Create new service_info record.');
+			console.log(rows);
 			keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
 			conn.release();
 			return;
 		});
-		conn.release();
 	});
 };

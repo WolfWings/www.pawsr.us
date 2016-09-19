@@ -41,6 +41,7 @@ try {
 	return;
 }
 
+var twitter_token_secret = data.session.twitter_token_secret;
 var uuid = 'login_twitter_' + data.session.twitter_uuid;
 keyvalue.set(uuid, 'wip');
 delete(data.session.twitter_token);
@@ -51,14 +52,12 @@ res.saveSession(data.session);
 res.setHeader('Location', '/login');
 res.end();
 
-
-
 var params = {
 	oauth_consumer_key:     secrets.oauthConsumerKey
 ,	oauth_nonce:            util.nonce()
 ,	oauth_signature_method: 'HMAC-SHA1'
 ,	oauth_timestamp:        Math.floor(Date.now() / 1000).toString()
-,	oauth_token:            data.session.twitter_token
+,	oauth_token:            data.query.oauth_token
 ,	oauth_version:          '1.0'
 ,	oauth_verifier:         data.query.oauth_verifier
 };
@@ -68,7 +67,7 @@ var authorization = 'OAuth oauth_signature=' + util.oauth1_signature(
 ,	'https:\x2F/api.twitter.com/oauth/access_token'
 ,	params
 ,	secrets.secretKey
-,	data.session.twitter_token_secret
+,	twitter_token_secret
 ,	'sha1');
 
 var url = {
@@ -89,24 +88,28 @@ var url = {
 
 var request = https.request(url, (response) => {
 	var buffer = Buffer.alloc(0);
-	if (response.statusCode !== 200) {
-		keyvalue.set(uuid, 'error:' + response.statusCode);
-		response.destroy();
-		return;
-	}
-
 	response.setEncoding('utf8');
 	response.on('data', (chunk) => {
 		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 	});
 	response.on('end', () => {
+		if (response.statusCode !== 200) {
+			keyvalue.set(uuid, 'error:' + response.statusCode);
+			response.destroy();
+			return;
+		}
+
+		var results = querystring.parse(buffer.toString('utf8'));
+
 		if (typeof results.user_id === 'undefined') {
 			keyvalue.set(uuid, 'error:No unique ID returned from Twitter.');
+			response.destroy();
 			return;
 		}
 
 		if (typeof results.screen_name === 'undefined') {
 			keyvalue.set(uuid, 'error:No screen name returned from Twitter.');
+			response.destroy();
 			return;
 		}
 
