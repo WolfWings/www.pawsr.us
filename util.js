@@ -52,5 +52,12 @@ exports.JSONreviver = (key, value) => {
 };
 
 exports.complete_login = (database, service, uuid, user_id, screen_name, custom_url) => {
-	keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
+	console.log(`Complete Login:\tService: ${service}\tUUID: ${uuid}\tUser ID: ${user_id}\tScreen Name: ${screen_name}\tCustom URL: ${custom_url}`);
+	var conn  = database.getConnection((err, conn) => {
+		if (err) {
+			throw err;
+		}
+		keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
+		conn.release();
+	});
 };
