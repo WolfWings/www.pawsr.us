@@ -1,5 +1,6 @@
 const http = require('http');
 const crypto = require('crypto');
+const util = require('./util.js');
 
 // Load the routes details
 var routes = require('./routes');
@@ -73,7 +74,10 @@ server.on('request', (raw, res) => {
 		try {
 			var decoded = '{' + aead.decrypt(cookies['session'], server_key).slice(12, -12) + '}';
 			console.log('Session: ' + decoded);
-			session = JSON.parse(decoded);
+			session = JSON.parse(decoded, util.JSONreviver);
+			if (typeof session.userid === 'string') {
+				session.userid = parseInt(session.userid);
+			}
 		} catch (e) {
 			console.log(e);
 			console.log(cookies.session);
@@ -87,7 +91,7 @@ server.on('request', (raw, res) => {
 	res.saveSession = (session) => {
 		var sessioncookie =
 			crypto.randomBytes(9).toString('base64')
-		+	JSON.stringify(session).slice(1, -1)
+		+	JSON.stringify(session, util.JSONreplacer).slice(1, -1)
 		+	crypto.randomBytes(9).toString('base64');
 		try {
 			sessioncookie = aead.encrypt(sessioncookie, server_key);

@@ -1,25 +1,15 @@
+UUID's are perhaps not the most accurate term, but it's the one
+I've adopted in this codebase. They are closer to cryptographic
+nonces, and are generated as such, but are opaque base64 blocks
+to identify individual operations that require server-side data
+to be stored between web-requests, to avoid stalling the client
+when waiting for remote data such as third-party API calls, and
+internal database lookups/writes.
+
 Session State:
 
-userid: <authenticated internal uuid>
-
-
-
-User list: users
-	[	<UUID>: <UUID> // Remapped UUID
-	...
-	,	<UUID>: null // valid UUID
-	]
-
-User profile structure: user_<UUID>
-	mergedto:	<new UUID> // All other records removed.
-	services: [
-		{	service: 'twitter'
-		,	uid: <opaque service-specific blob>
-		,	name: <name on service>
-		,	url: <url to profile>
-		}
-	]
-
+userid: <authenticated internal id, ALWAYS padded to 15 digits>
+<service>_uuid: Internal uuid used for tracking state of logins
 
 
 

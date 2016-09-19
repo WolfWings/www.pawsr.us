@@ -26,6 +26,31 @@ exports.oauth1_signature = (method, url, params, key, token, hash) => {
 	return '\x22' + escape(hmac.digest('base64')) + '\x22';
 };
 
+exports.JSONreplacer = (key, value) => {
+	switch (typeof v) {
+		case 'number':
+			return ((v < 0) ? '-' : '+') + ('000000000000000' + Math.abs(v).toString(10)).slice(-15);
+		case 'string':
+			return '_'+ v;
+		default:
+			return v;
+	}
+};
+
+exports.JSONreviver = (key, value) => {
+	if (typeof v !== 'string') {
+		return v;
+	}
+	switch (v.slice(0, 1)) {
+		case '-':
+		case '+':
+			return parseInt(v);
+			break;
+		default:
+			return v.slice(1);
+	}
+};
+
 exports.complete_login = (database, service, uuid, user_id, screen_name, custom_url) => {
 	keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
-}
+};
