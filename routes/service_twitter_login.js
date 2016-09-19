@@ -110,7 +110,7 @@ var request = https.request(url, (response) => {
 			return;
 		}
 
-		util.complete_login('Twitter', uuid, results.user_id, results.screen_name, results.screen_name);
+		util.complete_login(res.database, 'Twitter', uuid, results.user_id, results.screen_name, results.screen_name);
 	});
 });
 request.on('error', (e) => {

@@ -26,6 +26,6 @@ exports.oauth1_signature = (method, url, params, key, token, hash) => {
 	return '\x22' + escape(hmac.digest('base64')) + '\x22';
 };
 
-exports.complete_login = (service, uuid, user_id, screen_name, custom_url) => {
+exports.complete_login = (database, service, uuid, user_id, screen_name, custom_url) => {
 	keyvalue.set(uuid, 'error:Code path unimplemented for ' + service + '!');
 }
