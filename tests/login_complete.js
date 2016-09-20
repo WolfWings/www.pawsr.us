@@ -2,33 +2,35 @@ global.debugging = true;
 var keyvalue = require('../keyvalue.js');
 global.database = require('../database.js');
 var login_complete = require('../utils/login_complete.js');
-global.database.getConnection((err, conn) => {
-	if (err) {
-		throw err;
-	}
 
-	console.log('Purging remnants of any prior test.');
+var users = {};
 
-	conn.query('DELETE FROM users WHERE _users IN (SELECT _users FROM service_info WHERE identifier LIKE "_test_%_test_")', (err, results) => {
+purge_test_remnants(do_tests, 0);
+
+function purge_test_remnants(finished_func, finished_arg) {
+	global.database.getConnection((err, conn) => {
 		if (err) {
 			throw err;
 		}
 
-		conn.release();
+		console.log('Purging test remnants...');
 
-		console.log('Remnants purged.');
+		conn.query('DELETE FROM users WHERE _users IN (SELECT _users FROM service_info WHERE identifier LIKE "_test_%_test_")', (err, results) => {
+			if (err) {
+				throw err;
+			}
 
-		console.log('Beginning actual tests...');
+			conn.release();
 
-		do_tests(0);
+			console.log('Remnants purged.');
+
+			finished_func(finished_arg);
+		});
 	});
-});
-
-var users = {};
+}
 
 function waitHelper(uuid, next_step) {
-	console.log('Waiting 1/4 second for ' + uuid + ' - ' + next_step);
-	setTimeout(waitForKeyValue, 250, uuid, next_step);
+	setImmediate(waitForKeyValue, uuid, next_step);
 }
 
 function waitForKeyValue(uuid, next_step) {
@@ -37,7 +39,6 @@ function waitForKeyValue(uuid, next_step) {
 		throw Error('Error: KeyValue missing... ' + uuid);
 	}
 	if (!value.startsWith('ready:')) {
-		console.log('UUID ' + uuid + ' complete.');
 		waitHelper(uuid, next_step);
 		return;
 	}
@@ -49,7 +50,6 @@ function waitForKeyValue(uuid, next_step) {
 
 function do_tests(step) {
 	var uuid = step.toString(10);
-	console.log('Testing step ' + step);
 	switch (step) {
 		case 0:
 			console.log('Creating user #0...');
@@ -84,6 +84,6 @@ function do_tests(step) {
 		default:
 			console.log('Tests complete.');
 			console.log(users);
-			process.exit();
+			purge_test_remnants(process.exit, 0);
 	}
 }

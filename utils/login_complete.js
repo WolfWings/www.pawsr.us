@@ -1,3 +1,4 @@
+/* istanbul ignore next */
 const keyvalue = require('../keyvalue.js');
 
 // This is a successful 'login' here

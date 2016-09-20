@@ -11,11 +11,11 @@ var loop, password, encrypted, decrypted;
 
 console.log('Generating random data to use for testing...');
 
-var fullpassword = crypto.randomBytes(1000000 * 32);
-var fulltext = crypto.randomBytes(1000000 * 100);
+var fullpassword = crypto.randomBytes(100000 * 32);
+var fulltext = crypto.randomBytes(100000 * 100);
 
 console.time('test');
-for (loop = 0; loop < 1000000; loop++) {
+for (loop = 0; loop < 100000; loop++) {
 	var text = proc.argv[2] || fulltext.slice(loop * 100, (loop + 1) * 100).toString('base64');
 	password = fullpassword.slice(loop * 32, (loop + 1) * 32);
 	encrypted = aead.encrypt(text, password);
@@ -26,8 +26,8 @@ for (loop = 0; loop < 1000000; loop++) {
 		console.log('{' + encrypted + '}');
 		console.log('[' + decrypted + ']');
 	}
-	if ((loop % 10000) === 0) {
-		process.stdout.write('\r' + ((1000000 - loop) / 10000) + '% remaining \b');
+	if ((loop % 1000) === 0) {
+		process.stdout.write('\r' + ((100000 - loop) / 1000) + '% remaining \b');
 	}
 }
 process.stdout.write('\r            \r');
