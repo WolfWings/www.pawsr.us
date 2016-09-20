@@ -1,7 +1,7 @@
-global.debugging = true;
-var keyvalue = require('../keyvalue.js');
+const assert = require('assert');
+const keyvalue = require('../keyvalue.js');
+const login_complete = require('../utils/login_complete.js');
 global.database = require('../database.js');
-var login_complete = require('../utils/login_complete.js');
 
 var users = {};
 
@@ -30,7 +30,7 @@ function purge_test_remnants(finished_func, finished_arg) {
 }
 
 function waitHelper(uuid, next_step) {
-	setImmediate(waitForKeyValue, uuid, next_step);
+	setTimeout(waitForKeyValue, 10, uuid, next_step);
 }
 
 function waitForKeyValue(uuid, next_step) {
@@ -54,36 +54,41 @@ function do_tests(step) {
 		case 0:
 			console.log('Creating user #0...');
 			keyvalue.set(uuid, 'wip');
-			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount0');
+			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
 		case 1:
 			console.log('Creating user #1...');
 			keyvalue.set(uuid, 'wip');
-			login_complete(undefined, 'Twitter', uuid, '_test_1_test_', 'TestAccount1');
+			login_complete(undefined, 'Twitter', uuid, '_test_1_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
 		case 2:
-			console.log('Triggering merge of users #0 and #1...');
+			console.log('Triggering merge of user #1 into user #0...');
 			keyvalue.set(uuid, 'wip');
-			login_complete(users['0'], 'Twitter', uuid, '_test_1_test_', 'TestAccount2');
+			login_complete(users['0'], 'Twitter', uuid, '_test_1_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
 		case 3:
-			console.log('Finding existing user #0...');
+			console.log('Creating user #2 while logged into user #0...');
 			keyvalue.set(uuid, 'wip');
-			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount3');
+			login_complete(users['0'], 'Twitter', uuid, '_test_2_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
 		case 4:
-			console.log('Creating user #2 while logged into user #0...');
+			console.log('Finding user #0...');
 			keyvalue.set(uuid, 'wip');
-			login_complete(users['3'], 'Twitter', uuid, '_test_2_test_', 'TestAccount4');
+			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
+
 		default:
+//			assert(users['0'] !== users['1']);
+//			assert(users['0'] === users['2']);
+//			assert(users['0'] === users['3']);
+//			assert(users['0'] === users['4']);
 			console.log('Tests complete.');
-			console.log(users);
+			console.log(JSON.stringify(users, null, 4));
 			purge_test_remnants(process.exit, 0);
 	}
 }

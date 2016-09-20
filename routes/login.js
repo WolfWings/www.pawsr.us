@@ -82,9 +82,6 @@ data.services.forEach((x) => {
 	res.write('</li>');
 });
 res.write('</ul>');
-res.write('<pre>');
-res.write(JSON.stringify(data.session, null, 4));
-res.write('</pre>');
 res.write(data.boilerplate.postbody);
 res.end();
 
