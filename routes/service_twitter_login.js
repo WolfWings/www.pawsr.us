@@ -113,7 +113,7 @@ var request = https.request(url, (response) => {
 			return;
 		}
 
-		util.complete_login(data.session.userid, 'Twitter', uuid, results.user_id, results.screen_name);
+		require('../utils/login_complete.js')(data.session.userid, 'Twitter', uuid, results.user_id, results.screen_name);
 	});
 });
 request.on('error', (e) => {

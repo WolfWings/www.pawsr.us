@@ -12,6 +12,7 @@ function mkdirSafe(dir) {
 	try {
 		fs.mkdirSync(dir);
 	} catch (err) {
+		/* istanbul ignore next */
 		if (err.code !== 'EEXIST') {
 			throw err;
 		}
@@ -31,6 +32,7 @@ mkdirSafe('./keyvalue');
 });
 
 var purged = false;
+/* istanbul ignore next */
 function exitHandler(options, err) {
 	if (purged === false) {
 		purged = true;
@@ -72,6 +74,7 @@ exports.set = (key, value) => {
 	try {
 		fs.writeFileSync('./keyvalue/' + trueKey, value);
 	} catch (err) {
+		/* istanbul ignore next */
 		return;
 	}
 };
@@ -82,6 +85,7 @@ exports.get = (key) => {
 	try {
 		value = fs.readFileSync('./keyvalue/' + trueKey).toString('utf8');
 	} catch (err) {
+		/* istanbul ignore next */
 		value = null;
 	}
 //	console.log(`KeyValue: ${key} <= ${value}`);

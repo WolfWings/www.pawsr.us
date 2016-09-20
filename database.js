@@ -77,6 +77,7 @@ const schema_updates = {
 // This function sends all updates required to the database
 // The 'setImmediate' tail-recusion avoids using up the stack
 // entirely, as there's no actual loopback calls at all.
+/* istanbul ignore next */
 var send_updates = (conn, records, index) => {
 	if (records.length < 1) {
 		conn.release();
@@ -103,11 +104,13 @@ var database = require('mysql').createPool(require('./secrets.js').database);
 
 // Verify database format/version
 database.getConnection((err, conn) => {
+	/* istanbul ignore if */
 	if (err) {
 		throw err;
 	}
 
 	conn.query('SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = DATABASE()', (err, rows, fields) => {
+		/* istanbul ignore if */
 		if (err) {
 			throw err;
 		}
@@ -115,16 +118,19 @@ database.getConnection((err, conn) => {
 		// Database doesn't exist, create whole cloth
 		// This is a special-case short-circuit to just send the ENTIRE
 		// database schema update list upstream to build from scratch.
+		/* istanbul ignore if */
 		if (rows[0].count === 0) {
 			send_updates(conn, Object.keys(schema_updates), 0);
 			return;
 		}
 
 		conn.query('SELECT record FROM versioning WHERE complete != "yes"', (err, rows, fields) => {
+			/* istanbul ignore if */
 			if (err) {
 				throw err;
 			}
 
+			/* istanbul ignore if */
 			if (rows.length > 0) {
 				for (var i = 0; i < rows.length; i++) {
 					console.log('Incomplete database update: ' + rows[i].record);
@@ -135,10 +141,12 @@ database.getConnection((err, conn) => {
 
 			conn.query('SELECT record FROM versioning WHERE complete = "yes"', (err, rows, fields) => {
 				var processed = [];
+				/* istanbul ignore if */
 				if (err) {
 					throw err;
 				}
 
+				/* istanbul ignore else */
 				if (rows.length > 0) {
 					for (var i = 0; i < rows.length; i++) {
 						processed.push(rows[i].record);
