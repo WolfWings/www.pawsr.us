@@ -1,12 +1,19 @@
 {
-  "name": "www.pawsr.us",
-  "version": "0.0.1",
-  "description": "www.pawsr.us website",
-  "main": "index.js",
-  "author": "Wolf <wolfwings@gmail.com>",
-  "license": "UNLICENSED",
-  "private": true,
-  "dependencies": {
+  "name": "www.pawsr.us"
+, "private": true
+, "version": "0.0.1"
+, "description": "www.pawsr.us website"
+, "main": "index.js"
+, "author": "Wolf <wolfwings@gmail.com>"
+, "license": "UNLICENSED"
+, "scripts": {
+    "test": "node_modules/.bin/istanbul cover tests/"
+  , "start": "node ./"
+  }
+, "dependencies": {
     "mysql": "^2.11.1"
+  }
+, "devDependencies": {
+    "istanbul": "^0.4.5"
   }
 }
