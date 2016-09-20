@@ -32,9 +32,9 @@ data.services.forEach((x) => {
 
 	if (status !== null) {
 		if (status.startsWith('ready:')) {
-			status = status.split(':');
-			console.log(status);
-			// TODO: Create/Add user account
+			data.session.userid = parseInt(status.slice(6));
+			delete data.session[service + '_uuid'];
+			updatesession = true;
 		} else if (status === 'wip') {
 			refresh = true;
 		}
