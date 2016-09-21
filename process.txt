@@ -8,106 +8,18 @@ internal database lookups/writes.
 
 Session State:
 
-userid: <authenticated internal id, ALWAYS padded to 15 digits>
+userid: <authenticated internal id>
 <service>_uuid: Internal uuid used for tracking state of logins
 
-
-
-/initlogin/<service>	Support URL for oauth1-based login mechanisms
-
-	If '${service}_uuid' session variable does NOT exist:
-		Generate UUID
-
-		Set '${service}_uuid_${UUID}' keyvalue to 'wip'
-
-		Set '${service}_uuid' session variable to UUID
-
-	307-Redirect to '/preauth/${service}'
-
-/preauth/<service>	'Holding tank' URL for oauth1-based login mechanisms
-
-	If '${service}_uuid' session variables does NOT exist:
-		307-Redirect to '/initlogin/${service}'
-
-	If '${service}_uuid_${UUID}' keyvalue DOESN'T exist:
-		Possible replay attack attempt, BOOT!
-
-		Delete '${service}_uuid' session variable
-
-		307-Redirect to '/'
-
-	Check status of '${service}_uuid_${UUID}' keyvalue:
-		'wip'
-			Meta-refresh to myself w/ 1-second delay
-
-		'error:'
-		default
-			Delete '${service}_uuid_${UUID}' keyvalue
-
-			Delete '${service}_uuid' session variable
-
-			Present error page w/ click to homepage
-
-		'ready:'
-			Store session variables for service-specific values
-
-			307-Redirect to calculated ${login_URL}
+Note that the client-side-AEAD cookie uses a modified JSON mode
+that expands numbers to fixed-width 15-digit strings plus their
+sign character, to harden against padding attacks caused by any
+differences in digits per number. Strings get an extr character
+in front which is stripped out. Other object types are normal &
+unmodified JSON encoding.
 
 
 
-/login/<service>	Return callback for each service
-
-	Verify required parameters in session and request exist and sync.
-
-	If anything is missing/broken, error page and WAIT for client to click.
-
-	Delete unrequired session variables
-
-	Set keyvalue 'login_${service}_${uuid}' to 'wip' state
-
-	Redirect client to '/login'
-
-	Begin processing request
-
-	On request error or request response lacking required elements...
-		Update keyvalue to 'error:${error_message}'
-
-	...otherwise...
-		Process login including merging accounts if needed
-
-		Update keyvalue to 'ready:${userid}'
-
-
-
-/login			Main login endpoint
-
-	List servics supported
-
-	If 'login_${service}' session value exists:
-
-		Store as UUID
-
-		Check status of 'login_${service}_${uuid}' keyvalue:
-
-		'wip'
-			Set 'processing' flag on login-icon
-			Disable link
-			Set meta-refresh for 1 second to /login
-
-		'error:'
-			Set 'error' flag on login-icon
-			Link to specific error/troubleshooting page
-
-		'ready:'
-			Delete keyvalue
-			Set 'userid' session variable to attached value
-
-
-
-/			Main Homepage
-	If logged out:
-		Describe website
-
-	Provide links to sub-systems:
-		Login Management (link to /login)
-		Profile Management (link to /profile)
+Previous description of the URL structure is removed pending my
+re-write to document things post-code-coverage testing to clean
+up the code heavily.
