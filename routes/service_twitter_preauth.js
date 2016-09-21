@@ -1,9 +1,9 @@
 const querystring = require('querystring');
 const https = require('https');
 
+const templating = require('../utils/templating.js');
 const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
-const util = require('../util.js');
 
 exports.register = (endpoints, shared_data) => {
 	console.log('Registering /preauth/twitter');
@@ -40,7 +40,7 @@ if (state === null) {
 if (state === 'wip') {
 	res.write(data.boilerplate.pretitle);
 	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
-	res.write(util.refresh(1, '/preauth/twitter'));
+	res.write(templating.refresh(1, '/preauth/twitter'));
 	res.write(data.boilerplate.prebody);
 	res.write('<p>Requesting unique login token from twitter...</p>');
 	res.write(data.boilerplate.postbody);

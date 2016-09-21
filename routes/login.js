@@ -1,5 +1,5 @@
 const keyvalue = require('../utils/keyvalue.js');
-const util = require('../util.js');
+const templating = require('../utils/templating.js');
 
 exports.register = (endpoints) => {
 	console.log('Registering /login');
@@ -16,23 +16,18 @@ var updatesession = false;
 data.services.forEach((x) => {
 	var service = x.name.toLowerCase();
 
-	if (typeof data.session[service + '_uuid'] === 'undefined') {
-		status = null;
-	} else {
-		try {
-			status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
-			if (status === null) {
-				delete data.session[service + '_uuid'];
-				updatesession = true;
-				refresh = true;
-			}
-		} catch (err) {
-			/* istanbul ignore next: failsafe catch, keyvalue has no throws */
-			status = null;
+	status = null;
+	if (typeof data.session[service + '_uuid'] !== 'undefined') {
+		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
+
+		if (status === null) {
+			delete data.session[service + '_uuid'];
+			updatesession = true;
+			refresh = true;
 		}
 	}
 
-	if (status !== null) {
+	if (typeof status === 'string') {
 		if (status.startsWith('ready:')) {
 			data.session.userid = parseInt(status.slice(6));
 			keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
@@ -47,44 +42,55 @@ data.services.forEach((x) => {
 if (updatesession) {
 	res.saveSession(data.session);
 }
+
 res.write(data.boilerplate.pretitle);
+
 res.write('<title>Login - www.pawsr.us</title>');
+
 if (refresh === true) {
-	res.write(util.refresh(1, '/login'));
+	res.write(templating.refresh(1, '/login'));
 }
+
 res.write(data.boilerplate.prebody);
+
 res.write('<p>Add/Verify Login</p>');
+
 res.write('<ul>');
+
 data.services.forEach((x) => {
 	var service = x.name.toLowerCase();
 
-	if (typeof data.session[service + '_uuid'] === 'undefined') {
-		status = null;
-	} else {
-		try {
-			status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
-		} catch (err) {
-			/* istanbul ignore next: failsafe catch, keyvalue has no throws */
-			status = null;
-		}
+	status = null;
+
+	if (typeof data.session[service + '_uuid'] !== 'undefined') {
+		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
 	}
+
 	if (status === null) {
 		status = '';
 	}
+
 	res.write('<li><a href=\x22' + x.login_url);
+
 	if (status === 'wip') {
 		res.write(' title=\x22Pending...\x22');
 	} else if (status.startsWith('error:')) {
 		res.write(' title=\x22Error: ' + status.slice(6) + '\x22');
 	}
+
 	res.write('\x22>' + x.name + '</a>');
+
 	if (data.session.hasOwnProperty(service + '_uuid')) {
 		res.write('<br><p><b>Status:</b> ' + status + '</p>');
 	}
+
 	res.write('</li>');
 });
+
 res.write('</ul>');
+
 res.write(data.boilerplate.postbody);
+
 res.end();
 
 

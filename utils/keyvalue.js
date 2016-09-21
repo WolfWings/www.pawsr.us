@@ -32,7 +32,7 @@ mkdirSafe('./keyvalue');
 });
 
 var purged = false;
-/* istanbul ignore next */
+/* istanbul ignore next: exitHandler's not detected by istanbul */
 function exitHandler(options, err) {
 	if (purged === false) {
 		purged = true;

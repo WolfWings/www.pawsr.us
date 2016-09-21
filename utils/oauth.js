@@ -1,16 +1,5 @@
 const crypto = require('crypto');
 const escape = require('querystring').escape;
-const keyvalue = require('./utils/keyvalue.js');
-
-exports.refresh = (timeout, url) => {
-	return	'<meta http-equiv=\x22Refresh\x22 content=\x22' + timeout + ';URL=' + url + '\x22 />';
-};
-
-exports.noscriptrefresh = (timeout, url) => {
-	return	'<script>document.write(\x22\\x3Cscript>\x2F*\x22);</script>'
-	+	exports.refresh(timeout, url)
-	+	'<script>\x2F**\x2F</script>';
-};
 
 exports.nonce = () => {
 	return crypto.randomBytes(24).toString('base64').replace(/\x2f/g, '_').replace(/\x2b/g, '-');

@@ -3,7 +3,7 @@ const https = require('https');
 
 const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
-const util = require('../util.js');
+const oauth = require('../utils/oauth.js');
 
 exports.register = (endpoints, shared_data) => {
 	console.log('Registering /login/twitter');
@@ -54,7 +54,7 @@ res.end();
 
 var params = {
 	oauth_consumer_key:     secrets.oauthConsumerKey
-,	oauth_nonce:            util.nonce()
+,	oauth_nonce:            oauth.nonce()
 ,	oauth_signature_method: 'HMAC-SHA1'
 ,	oauth_timestamp:        Math.floor(Date.now() / 1000).toString()
 ,	oauth_token:            data.query.oauth_token
@@ -62,7 +62,7 @@ var params = {
 ,	oauth_verifier:         data.query.oauth_verifier
 };
 
-var authorization = 'OAuth oauth_signature=' + util.oauth1_signature(
+var authorization = 'OAuth oauth_signature=' + oauth.oauth1_signature(
 	'POST'
 ,	'https:\x2F/api.twitter.com/oauth/access_token'
 ,	params

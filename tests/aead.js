@@ -31,4 +31,11 @@ for (loop = 0; loop < 100; loop++) {
 }
 console.timeEnd('aead');
 
+console.log('Attempting invalid AEAD decryption.');
+try {
+	aead.decrypt('wolf.wolf.wolf.wolf', '');
+} catch (err) {
+	console.log('Invalid AEAD decryption confirmed.');
+}
+
 console.log('Encryption tests complete');

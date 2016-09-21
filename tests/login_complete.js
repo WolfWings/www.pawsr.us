@@ -1,4 +1,3 @@
-const assert = require('assert');
 const keyvalue = require('../utils/keyvalue.js');
 const login_complete = require('../utils/login_complete.js');
 
@@ -82,12 +81,13 @@ function do_tests(step) {
 			break;
 
 		default:
-//			assert(users['0'] !== users['1']);
-//			assert(users['0'] === users['2']);
-//			assert(users['0'] === users['3']);
-//			assert(users['0'] === users['4']);
 			console.log('Tests complete.');
-			console.log(JSON.stringify(users, null, 4));
+			if ((users['0'] !== users['1'])
+			 && (users['0'] === users['2'])
+			 && (users['0'] === users['3'])
+			 && (users['0'] === users['4'])) {
+				console.log('Tests passed.');
+			}
 			purge_test_remnants((x) => { return; }, 0);
 	}
 }

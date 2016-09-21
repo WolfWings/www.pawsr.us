@@ -3,7 +3,7 @@ const https = require('https');
 
 const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
-const util = require('../util.js');
+const oauth = require('../utils/oauth.js');
 
 exports.register = (endpoints, shared_data) => {
 	console.log('Registering /initlogin/twitter');
@@ -13,8 +13,8 @@ exports.register = (endpoints, shared_data) => {
 
 
 
-var uuid = util.nonce();
-var nonce = util.nonce();
+var uuid = oauth.nonce();
+var nonce = oauth.nonce();
 keyvalue.set('twitter_uuid_' + uuid, 'wip');
 data.session['twitter_uuid'] = uuid;
 res.statusCode = 307;
@@ -31,7 +31,7 @@ var params = {
 ,	oauth_version:          '1.0'
 };
 
-var authorization = 'OAuth oauth_signature=' + util.oauth1_signature('POST', 'https:\x2F/api.twitter.com/oauth/request_token', params, secrets.secretKey, '', 'sha1');
+var authorization = 'OAuth oauth_signature=' + oauth.oauth1_signature('POST', 'https:\x2F/api.twitter.com/oauth/request_token', params, secrets.secretKey, '', 'sha1');
 
 var url = {
 	method: 'POST'

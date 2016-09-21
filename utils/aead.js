@@ -47,7 +47,6 @@ exports.decrypt = (encrypted, password) => {
 			engine = crypto.createDecipheriv('aes-256-gcm', password, components[2]);
 			engine.setAuthTag(components[3]);
 			break;
-		/* istanbul ignore next: Failsafe to future-proof */
 		default:
 			throw new TypeError('Unknown Algorithm parameter!');
 	}
