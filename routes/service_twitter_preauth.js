@@ -1,7 +1,7 @@
 const querystring = require('querystring');
 const https = require('https');
 
-const keyvalue = require('../keyvalue.js');
+const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 const util = require('../util.js');
 

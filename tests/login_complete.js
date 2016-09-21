@@ -1,5 +1,5 @@
 const assert = require('assert');
-const keyvalue = require('../keyvalue.js');
+const keyvalue = require('../utils/keyvalue.js');
 const login_complete = require('../utils/login_complete.js');
 
 var users = {};

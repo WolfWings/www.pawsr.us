@@ -1,5 +1,5 @@
 /* istanbul ignore next */
-const keyvalue = require('../keyvalue.js');
+const keyvalue = require('../utils/keyvalue.js');
 
 // This is a successful 'login' here
 // Goal: If user_id is set, that is where everything will be 'merged to'

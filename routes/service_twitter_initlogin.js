@@ -1,3 +1,10 @@
+const querystring = require('querystring');
+const https = require('https');
+
+const keyvalue = require('../utils/keyvalue.js');
+const secrets = require('../secrets.js').services.twitter;
+const util = require('../util.js');
+
 exports.register = (endpoints, shared_data) => {
 	console.log('Registering /initlogin/twitter');
 	endpoints.push({
@@ -5,13 +12,6 @@ exports.register = (endpoints, shared_data) => {
 	,	routine: (data, res) => {
 
 
-
-const querystring = require('querystring');
-const https = require('https');
-
-const keyvalue = require('../keyvalue.js');
-const secrets = require('../secrets.js').services.twitter;
-const util = require('../util.js');
 
 var uuid = util.nonce();
 var nonce = util.nonce();

@@ -4,7 +4,7 @@
 
 
 var proc = require('process');
-var aead = require('../aead.js');
+var aead = require('../utils/aead.js');
 var crypto = require('crypto');
 
 var loop, password, encrypted, decrypted;

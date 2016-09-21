@@ -103,7 +103,7 @@ var send_updates = (conn, records, index) => {
 };
 
 // Build the connection pool itself
-var database = require('mysql').createPool(require('./secrets.js').database);
+var database = require('mysql').createPool(require('../secrets.js').database);
 
 console.log('Connecting to database.');
 

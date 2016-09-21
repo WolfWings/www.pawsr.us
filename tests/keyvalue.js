@@ -1,5 +1,5 @@
 const assert = require('assert');
-const keyvalue = require('../keyvalue.js');
+const keyvalue = require('../utils/keyvalue.js');
 
 keyvalue.set('_', '=');
 assert(keyvalue.get('_') === '=');

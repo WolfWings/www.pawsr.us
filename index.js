@@ -9,7 +9,7 @@ const endpoints = routes.endpoints;
 delete routes;
 
 // Build the database connection at the central level
-global.database = require('./database.js');
+global.database = require('./utils/database.js');
 
 //
 // Build the HTTP listener server
@@ -32,7 +32,7 @@ server.on('clientError', (err, socket) => {
 // Also parse out the 'cookies' from the headers
 server.on('request', (raw, res) => {
 	const url = require('url');
-	const aead = require('./aead.js');
+	const aead = require('./utils/aead.js');
 	const querystring = require('querystring');
 	const server_key = Buffer.from(require('./secrets.js').server_key, 'base64');
 

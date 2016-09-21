@@ -1,4 +1,4 @@
-const keyvalue = require('../keyvalue.js');
+const keyvalue = require('../utils/keyvalue.js');
 const util = require('../util.js');
 
 exports.register = (endpoints) => {

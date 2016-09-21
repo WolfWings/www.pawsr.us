@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const escape = require('querystring').escape;
-const keyvalue = require('./keyvalue.js');
+const keyvalue = require('./utils/keyvalue.js');
 
 exports.refresh = (timeout, url) => {
 	return	'<meta http-equiv=\x22Refresh\x22 content=\x22' + timeout + ';URL=' + url + '\x22 />';
