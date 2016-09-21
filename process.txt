@@ -20,6 +20,47 @@ unmodified JSON encoding.
 
 
 
-Previous description of the URL structure is removed pending my
-re-write to document things post-code-coverage testing to clean
-up the code heavily.
+Global URL structure:
+
+/
+	Generic homepage
+
+/login
+	Lists all services
+	Handle 'login_${service}_${uuid}' token if it exists
+		This means showing WIP/Error status on icon
+		If 'ready' it sets/updates the 'userid' session
+		state, I.E. the server-side login state/user.
+
+/profile
+	TODO: Handle creating/managing public contact URLs
+
+
+
+URL sequence for OAuth 1.0a-based services, I.E. Twitter:
+
+Initial URL link on /login for service:
+	/initlogin/${service}
+
+Callback URL for service:
+	/login/${service}
+
+/initlogin/${service}
+	Performs 'request_token' step
+	Generates ${uuid} for tracking
+	Sets ${service}_uuid session token to ${uuid}
+	Creates ${service}_uuid_${uuid} server-side token
+	Redirects (via 307) immediately to /preauth/${service}
+
+/preauth/${service}
+	Monitors ${service}_uuid_${uuid}
+	Provides interstitial webpage for client
+	When 'request_token' is complete, triggers the redirect
+	to the true 'login' URL for ${service}
+
+/login/${service}
+	Performs 'access_token' step
+	Verifies session state and returned OAuth data match
+	Setup 'login_${service}_${uuid}' server-side token
+	Deletes unrequired session state
+	Redirects (via 307) immediately to /login
