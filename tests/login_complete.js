@@ -1,7 +1,6 @@
 const assert = require('assert');
 const keyvalue = require('../keyvalue.js');
 const login_complete = require('../utils/login_complete.js');
-global.database = require('../database.js');
 
 var users = {};
 
@@ -89,6 +88,6 @@ function do_tests(step) {
 //			assert(users['0'] === users['4']);
 			console.log('Tests complete.');
 			console.log(JSON.stringify(users, null, 4));
-			purge_test_remnants(process.exit, 0);
+			purge_test_remnants((x) => { return; }, 0);
 	}
 }

@@ -78,7 +78,7 @@ var url = {
 ,	path: '/oauth/access_token'
 ,	agent: false
 ,	headers: {
-		'Accept': '*/*'
+		'Accept': '*\x2F*'
 	,	'Authorization': authorization
 	,	'Content-Type': 'application/x-www-form-urlencoded'
 	,	'Host': 'api.twitter.com'
@@ -92,6 +92,7 @@ var request = https.request(url, (response) => {
 	response.on('data', (chunk) => {
 		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 	});
+	/* istanbul ignore next: No sane way to store valid Twitter creds, remainder is straight-forward */
 	response.on('end', () => {
 		if (response.statusCode !== 200) {
 			keyvalue.set(uuid, 'error:' + response.statusCode);
@@ -116,6 +117,7 @@ var request = https.request(url, (response) => {
 		require('../utils/login_complete.js')(data.session.userid, 'Twitter', uuid, results.user_id, results.screen_name);
 	});
 });
+/* istanbul ignore next: No way to force CURL errors */
 request.on('error', (e) => {
 	keyvalue.set(uuid, 'error:Twitter API request failure.');
 	console.log(`Problem with request: ${e.message}`);
@@ -125,6 +127,49 @@ request.end();
 
 
 
+		}
+	,	test_code_coverage: (routine, res, raw_data) => {
+			var data;
+			console.log('Testing /login/twitter w/ empty data');
+			data = JSON.parse(raw_data);
+			data.query = {};
+			data.session = {};
+			routine(data, res);
+
+			console.log('Testing /login/twitter with mismatched Nonce/State');
+			data = JSON.parse(raw_data);
+			data.query = {
+				state: '0'
+			};
+			data.session = {
+				twitter_uuid: '1'
+			};
+			routine(data, res);
+
+			console.log('Testing /login/twitter with Replay Attach');
+			data = JSON.parse(raw_data);
+			data.query = {
+				state: '0'
+			,	oauth_token: '0'
+			};
+			data.session = {
+				twitter_uuid: '0'
+			,	twitter_token: '1'
+			};
+			routine(data, res);
+
+			console.log('Testing /login/twitter with matching initial data');
+			data = JSON.parse(raw_data);
+			data.query = {
+				state: '0'
+			,	oauth_token: '0'
+			,	oauth_verifier: '0'
+			};
+			data.session = {
+				twitter_uuid: '0'
+			,	twitter_token: '0'
+			};
+			routine(data, res);
 		}
 	});
 }

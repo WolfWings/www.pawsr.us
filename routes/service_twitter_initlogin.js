@@ -41,7 +41,7 @@ var url = {
 ,	path: '/oauth/request_token'
 ,	agent: false
 ,	headers: {
-		'Accept': '*/*'
+		'Accept': '*\x2F*'
 	,	'Authorization': authorization
 	,	'Content-Type': 'application/x-www-form-urlencoded'
 	,	'Host': 'api.twitter.com'
@@ -50,7 +50,9 @@ var url = {
 };
 
 var request = https.request(url, (response) => {
+	console.log('response');
 	var buffer = Buffer.alloc(0);
+	/* istanbul ignore if: No convenient way to plumb invalid twitter credentials in */
 	if (response.statusCode !== 200) {
 		keyvalue.delete('twitter_uuid_' + uuid);
 		response.destroy();
@@ -64,17 +66,20 @@ var request = https.request(url, (response) => {
 	response.on('end', () => {
 		var results = querystring.parse(buffer.toString('utf8'));
 		try {
+			/* istanbul ignore if: No convenient way to plumb invalid twitter credentials in */
 			if (results['oauth_callback_confirmed'] !== 'true') {
 				throw new TypeError('Twitter oauth_callback_confirmed not true!');
 			}
 			keyvalue.set('twitter_uuid_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
 		} catch (err) {
+			/* istanbul ignore next: No convenient way to plumb invalid twitter credentials in */
 			keyvalue.set('twitter_uuid_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
-			return;
 		}
+
 	});
 });
 request.on('error', (e) => {
+	/* istanbul ignore next: Required curl/coding error to trigger */
 	console.log(`Problem with request: ${e.message}`);
 });
 request.write(querystring.stringify(params));
@@ -82,6 +87,15 @@ request.end();
 
 
 
+		}
+	,	test_code_coverage: (routine, res, raw_data) => {
+			var data;
+			data = JSON.parse(raw_data);
+			data.session = {};
+			console.log('Testing /initlogin/twitter');
+			routine(data, res);
+
+			return 5000;
 		}
 	});
 }

@@ -79,8 +79,11 @@ const schema_updates = {
 // entirely, as there's no actual loopback calls at all.
 /* istanbul ignore next */
 var send_updates = (conn, records, index) => {
+	console.log('send_updates');
 	if (records.length < 1) {
+		console.log('Finished updating database schema.');
 		conn.release();
+		delete conn;
 		return;
 	}
 
@@ -102,8 +105,12 @@ var send_updates = (conn, records, index) => {
 // Build the connection pool itself
 var database = require('mysql').createPool(require('./secrets.js').database);
 
+console.log('Connecting to database.');
+
 // Verify database format/version
 database.getConnection((err, conn) => {
+	console.log('Verifying database has any tables in it.');
+
 	/* istanbul ignore if */
 	if (err) {
 		throw err;
@@ -124,6 +131,8 @@ database.getConnection((err, conn) => {
 			return;
 		}
 
+		console.log('Checking for incomplete schema updates.');
+
 		conn.query('SELECT record FROM versioning WHERE complete != "yes"', (err, rows, fields) => {
 			/* istanbul ignore if */
 			if (err) {
@@ -139,6 +148,8 @@ database.getConnection((err, conn) => {
 				throw Error('Database in inconsistent state! Incomplete schema update recorded.');
 			}
 
+			console.log('Checking for completed schema updates.');
+
 			conn.query('SELECT record FROM versioning WHERE complete = "yes"', (err, rows, fields) => {
 				var processed = [];
 				/* istanbul ignore if */
@@ -153,7 +164,9 @@ database.getConnection((err, conn) => {
 					}
 				}
 
-				send_updates(conn, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
+				console.log('Updating schema...');
+
+				setImmediate(send_updates, conn, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
 			});
 		});
 	});

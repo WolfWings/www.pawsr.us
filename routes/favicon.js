@@ -16,6 +16,9 @@ res.end();
 
 
 		}
+	,	test_code_coverage: (routine, res) => {
+			routine({}, res);
+		}
 	});
 
 	const png = fs.readFileSync('./static/favicon/favicon.png');
@@ -33,6 +36,9 @@ res.end();
 
 
 		}
+	,	test_code_coverage: (routine, res) => {
+			routine({}, res);
+		}
 	});
 
 	const apple = fs.readFileSync('./static/favicon/apple.png');
@@ -49,6 +55,9 @@ res.end();
 
 
 
+		}
+	,	test_code_coverage: (routine, res) => {
+			routine({}, res);
 		}
 	});
 };

@@ -1,3 +1,6 @@
+const keyvalue = require('../keyvalue.js');
+const util = require('../util.js');
+
 exports.register = (endpoints) => {
 	console.log('Registering /login');
 	endpoints.push({
@@ -6,8 +9,6 @@ exports.register = (endpoints) => {
 
 
 
-const keyvalue = require('../keyvalue.js');
-const util = require('../util.js');
 var status;
 
 var refresh = false;
@@ -26,6 +27,7 @@ data.services.forEach((x) => {
 				refresh = true;
 			}
 		} catch (err) {
+			/* istanbul ignore next: failsafe catch, keyvalue has no throws */
 			status = null;
 		}
 	}
@@ -33,6 +35,7 @@ data.services.forEach((x) => {
 	if (status !== null) {
 		if (status.startsWith('ready:')) {
 			data.session.userid = parseInt(status.slice(6));
+			keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
 			delete data.session[service + '_uuid'];
 			updatesession = true;
 		} else if (status === 'wip') {
@@ -61,6 +64,7 @@ data.services.forEach((x) => {
 		try {
 			status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
 		} catch (err) {
+			/* istanbul ignore next: failsafe catch, keyvalue has no throws */
 			status = null;
 		}
 	}
@@ -72,8 +76,6 @@ data.services.forEach((x) => {
 		res.write(' title=\x22Pending...\x22');
 	} else if (status.startsWith('error:')) {
 		res.write(' title=\x22Error: ' + status.slice(6) + '\x22');
-	} else if (status.startsWith('ready:')) {
-		res.write(' title=\x22' + status.split(':')[2] + '\x22');
 	}
 	res.write('\x22>' + x.name + '</a>');
 	if (data.session.hasOwnProperty(service + '_uuid')) {
@@ -87,6 +89,48 @@ res.end();
 
 
 
+		}
+	,	test_code_coverage: (routine, res, raw_data) => {
+			var data;
+			data = JSON.parse(raw_data);
+			data.session = {};
+			console.log('Testing /login with empty session');
+			routine(data, res);
+
+			data = JSON.parse(raw_data);
+			data.session = {
+				twitter_uuid: '0'
+			};
+			keyvalue.delete('login_twitter_0');
+			console.log('Testing /login with invalid twitter uuid');
+			routine(data, res);
+
+			data = JSON.parse(raw_data);
+			data.session = {
+				twitter_uuid: '1'
+			};
+			keyvalue.set('login_twitter_1', 'wip');
+			console.log('Testing /login with twitter uuid: wip');
+			routine(data, res);
+			keyvalue.delete('login_twitter_1');
+
+			data = JSON.parse(raw_data);
+			data.session = {
+				twitter_uuid: '2'
+			};
+			keyvalue.set('login_twitter_2', 'error:Testing');
+			console.log('Testing /login with twitter uuid: error');
+			routine(data, res);
+			keyvalue.delete('login_twitter_2');
+
+			data = JSON.parse(raw_data);
+			data.session = {
+				twitter_uuid: '3'
+			};
+			keyvalue.set('login_twitter_3', 'ready:0');
+			console.log('Testing /login with twitter uuid: ready');
+			routine(data, res);
+			keyvalue.delete('login_twitter_3');
 		}
 	});
 }

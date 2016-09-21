@@ -9,14 +9,16 @@ var crypto = require('crypto');
 
 var loop, password, encrypted, decrypted;
 
-console.log('Generating random data to use for testing...');
+console.log('Generating random data to use for testing');
 
-var fullpassword = crypto.randomBytes(100000 * 32);
-var fulltext = crypto.randomBytes(100000 * 100);
+var fullpassword = crypto.randomBytes(100 * 32);
+var fulltext = crypto.randomBytes(100 * 1000);
 
-console.time('test');
-for (loop = 0; loop < 100000; loop++) {
-	var text = proc.argv[2] || fulltext.slice(loop * 100, (loop + 1) * 100).toString('base64');
+console.log('Performing 100 unique encryption tests');
+
+console.time('aead');
+for (loop = 0; loop < 100; loop++) {
+	var text = fulltext.slice(loop * 1000, (loop + 1) * 1000).toString('base64');
 	password = fullpassword.slice(loop * 32, (loop + 1) * 32);
 	encrypted = aead.encrypt(text, password);
 	decrypted = aead.decrypt(encrypted, password);
@@ -26,9 +28,7 @@ for (loop = 0; loop < 100000; loop++) {
 		console.log('{' + encrypted + '}');
 		console.log('[' + decrypted + ']');
 	}
-	if ((loop % 1000) === 0) {
-		process.stdout.write('\r' + ((100000 - loop) / 1000) + '% remaining \b');
-	}
 }
-process.stdout.write('\r            \r');
-console.timeEnd('test');
+console.timeEnd('aead');
+
+console.log('Encryption tests complete');
