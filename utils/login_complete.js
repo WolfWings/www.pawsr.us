@@ -22,6 +22,16 @@ const keyvalue = require('../utils/keyvalue.js');
 // Return user_id
 
 module.exports = (user_id, service, uuid, unique_id, screen_name) => {
+	if (typeof unique_id === 'undefined') {
+		keyvalue.set(uuid, 'error:No unique ID returned from ' + service);
+		return;
+	}
+
+	if (typeof screen_name === 'undefined') {
+		keyvalue.set(uuid, 'error:No screen name returned from ' + service);
+		return;
+	}
+
 	global.database.getConnection((err, conn) => {
 		/* istanbul ignore next */
 		function database_error() {

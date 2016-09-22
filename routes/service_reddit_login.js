@@ -113,16 +113,6 @@ var request = https.request(url, (response) => {
 
 				var results = JSON.parse(buffer.toString('utf8'));
 
-				if (typeof results.id === 'undefined') {
-					keyvalue.set(uuid, 'error:No unique ID returned from Reddit.');
-					return;
-				}
-
-				if (typeof results.name === 'undefined') {
-					keyvalue.set(uuid, 'error:No screen name returned from Reddit.');
-					return;
-				}
-
 				require('../utils/login_complete.js')(data.session.userid, 'Reddit', uuid, results.id, results.name);
 			});
 		});

@@ -101,16 +101,6 @@ var request = https.request(url, (response) => {
 
 		var results = querystring.parse(buffer.toString('utf8'));
 
-		if (typeof results.user_id === 'undefined') {
-			keyvalue.set(uuid, 'error:No unique ID returned from Twitter.');
-			return;
-		}
-
-		if (typeof results.screen_name === 'undefined') {
-			keyvalue.set(uuid, 'error:No screen name returned from Twitter.');
-			return;
-		}
-
 		require('../utils/login_complete.js')(data.session.userid, 'Twitter', uuid, results.user_id, results.screen_name);
 	});
 });
