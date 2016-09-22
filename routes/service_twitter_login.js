@@ -96,7 +96,6 @@ var request = https.request(url, (response) => {
 	response.on('end', () => {
 		if (response.statusCode !== 200) {
 			keyvalue.set(uuid, 'error:' + response.statusCode);
-			response.destroy();
 			return;
 		}
 
@@ -104,13 +103,11 @@ var request = https.request(url, (response) => {
 
 		if (typeof results.user_id === 'undefined') {
 			keyvalue.set(uuid, 'error:No unique ID returned from Twitter.');
-			response.destroy();
 			return;
 		}
 
 		if (typeof results.screen_name === 'undefined') {
 			keyvalue.set(uuid, 'error:No screen name returned from Twitter.');
-			response.destroy();
 			return;
 		}
 

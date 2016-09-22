@@ -86,13 +86,27 @@ server.on('request', (raw, res) => {
 		}
 	}
 
+	// Utility function in case we need to nuke the session, mostly just for logout
+	// Centralized here to guarantee we only use one minimal and valid session value
+	// And yes, this key is valid. :)
+	res.deleteSession = () => {
+		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+	}
+
 	// Utility DRY function for storing an updated session-state
 	// Note that this must be called manually IF saving changes!
 	res.saveSession = (session) => {
-		var sessioncookie =
+		var sessioncookie = JSON.stringify(session, JSON_utils.JSONreplacer).slice(1, -1);
+		if (sessioncookie === '') {
+			res.deleteSession();
+			return;
+		}
+
+		sessioncookie =
 			crypto.randomBytes(9).toString('base64')
-		+	JSON.stringify(session, JSON_utils.JSONreplacer).slice(1, -1)
+		+	sessioncookie
 		+	crypto.randomBytes(9).toString('base64');
+
 		try {
 			sessioncookie = aead.encrypt(sessioncookie, server_key);
 		} catch (e) {
@@ -101,13 +115,6 @@ server.on('request', (raw, res) => {
 		} finally {
 			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Path=/; Domain=.pawsr.us');
 		}
-	}
-
-	// Utility function in case we need to nuke the session, mostly just for logout
-	// Centralized here to guarantee we only use one minimal and valid session value
-	// And yes, this key is valid. :)
-	res.deleteSession = () => {
-		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
 	// Provide access to the database

@@ -55,7 +55,6 @@ var request = https.request(url, (response) => {
 	/* istanbul ignore if: No convenient way to plumb invalid twitter credentials in */
 	if (response.statusCode !== 200) {
 		keyvalue.delete('twitter_uuid_' + uuid);
-		response.destroy();
 		return;
 	}
 

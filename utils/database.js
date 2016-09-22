@@ -72,6 +72,15 @@ const schema_updates = {
 	 +	' SET title="Twitter", url_format="https:\x2F/twitter.com/%s", class="twitter", login="yes", internaldisplay=""'
 	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.0.twitter"'
 	]
+
+,	'0.0.reddit': [
+		'INSERT INTO versioning'
+	 +	' SET record = "0.0.reddit", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'INSERT INTO services'
+	 +	' SET title="Reddit", url_format="https:\x2F/www.reddit.com/u/%s", class="reddit", login="yes", internaldisplay=""'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.0.reddit"'
+	]
 };
 
 // This function sends all updates required to the database
