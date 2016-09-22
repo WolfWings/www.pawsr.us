@@ -45,7 +45,7 @@ var url = {
 	,	'Authorization': authorization
 	,	'Content-Type': 'application/x-www-form-urlencoded'
 	,	'Host': 'api.twitter.com'
-	,	'User-Agent': shared_data.user_agent
+	,	'User-Agent': data.user_agent
 	}
 };
 
