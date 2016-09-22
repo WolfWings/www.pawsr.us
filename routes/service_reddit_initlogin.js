@@ -18,10 +18,10 @@ data.session['reddit_uuid'] = uuid;
 res.statusCode = 307;
 res.saveSession(data.session);
 res.setHeader('Location', 'https:\x2F/www.reddit.com/api/v1/authorize.compact?' + querystring.stringify({
-	scope: 'identity'
-,	response_type: 'code'
-,	client_id: secrets.clientID
+	client_id: secrets.clientID
 ,	redirect_uri: 'https:\x2F/www.pawsr.us/login/reddit'
+,	response_type: 'code'
+,	scope: 'identity'
 ,	state: uuid
 }) + '#');
 res.end();
