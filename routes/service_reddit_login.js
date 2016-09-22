@@ -59,7 +59,7 @@ var url = {
 ,	agent: false
 ,	auth: secrets.clientID + ':' + secrets.clientSecret
 ,	headers: {
-		'User-Agent': 'web:www.pawsr.us:v0.9.9 (by /u/wolfwings)'
+		'User-Agent': shared_data.user_agent
 	,	'Accept': 'application\x2Fjson'
 	,	'Content-Type': 'application/x-www-form-urlencoded'
 	,	'Content-Length': Buffer.byteLength(params)
@@ -93,7 +93,7 @@ var request = https.request(url, (response) => {
 		,	path: '/api/v1/me?raw_json=1'
 		,	agent: false
 		,	headers: {
-				'User-Agent': 'web:www.pawsr.us:v0.9.9 (by /u/wolfwings)'
+				'User-Agent': shared_data.user_agent
 			,	'Accept': 'application\x2Fjson'
 			,	'Authorization': 'Bearer ' + results.access_token
 			}
