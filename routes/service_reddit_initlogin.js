@@ -1,5 +1,4 @@
 const querystring = require('querystring');
-const https = require('https');
 
 const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.reddit;
