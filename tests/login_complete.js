@@ -79,6 +79,18 @@ function do_tests(step) {
 			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
+		case 5:
+			console.log('Invalid ID...');
+			login_complete(undefined, undefined, uuid, '_test_3_test_', undefined);
+			keyvalue.set(uuid, 'ready:-1');
+			waitHelper(uuid, step + 1);
+			break;
+		case 6:
+			console.log('Invalid user...');
+			login_complete(undefined, undefined, uuid, undefined, undefined);
+			keyvalue.set(uuid, 'ready:-1');
+			waitHelper(uuid, step + 1);
+			break;
 
 		default:
 			console.log('Tests complete.');

@@ -21,8 +21,8 @@ setTimeout(do_test, 1000, 0);
 
 function do_test(index) {
 	if (index >= files.length) {
-		console.log('Waiting 2 seconds to allow tests to complete.');
-		setTimeout(process.exit, 2000, 0);
+		console.log('Waiting 5 seconds to allow tests to complete.');
+		setTimeout(process.exit, 5000, 0);
 		return;
 	}
 	require(path.join(__dirname, files[index]));

@@ -23,11 +23,13 @@ const keyvalue = require('../utils/keyvalue.js');
 
 module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 	if (typeof unique_id === 'undefined') {
+		console.log('No unique ID!');
 		keyvalue.set(uuid, 'error:No unique ID returned from ' + service);
 		return;
 	}
 
 	if (typeof screen_name === 'undefined') {
+		console.log('No screen name!');
 		keyvalue.set(uuid, 'error:No screen name returned from ' + service);
 		return;
 	}
