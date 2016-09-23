@@ -3,6 +3,6 @@ exports.register = (endpoints, shared_data) => {
 	shared_data.services.push({
 		name:		'Reddit'
 	,	login_url:	'/initlogin/reddit'
-	,	logout_url:	'https://www.reddit.com/logout'
+	,	logout_url:	'https:\x2F/www.reddit.com/logout'
 	});
 }

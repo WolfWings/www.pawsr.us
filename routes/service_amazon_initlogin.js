@@ -17,7 +17,7 @@ var uuid = oauth.nonce();
 data.session['amazon_uuid'] = uuid;
 res.statusCode = 307;
 res.saveSession(data.session);
-res.setHeader('Location', 'https://www.amazon.com/ap/oa?' + querystring.stringify({
+res.setHeader('Location', 'https:\x2F/www.amazon.com/ap/oa?' + querystring.stringify({
 	client_id: secrets.clientID
 ,	redirect_uri: 'https:\x2F/www.pawsr.us/login/amazon'
 ,	response_type: 'code'

@@ -3,6 +3,6 @@ exports.register = (endpoints, shared_data) => {
 	shared_data.services.push({
 		name:		'Twitter'
 	,	login_url:	'/initlogin/twitter'
-	,	logout_url:	'https://twitter.com/logout'
+	,	logout_url:	'https:\x2F/twitter.com/logout'
 	});
 }

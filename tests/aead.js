@@ -1,8 +1,3 @@
-// Nodejs encryption with GCM
-// Does not work with nodejs v0.10.31
-// Part of https://github.com/chris-rock/node-crypto-examples
-
-
 var proc = require('process');
 var aead = require('../utils/aead.js');
 var crypto = require('crypto');
