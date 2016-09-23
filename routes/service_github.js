@@ -1,8 +1,8 @@
 exports.register = (endpoints, shared_data) => {
-	console.log('Adding Github service');
+	console.log('Adding GitHub service');
 	shared_data.services.push({
-		name:		'Github'
+		name:		'GitHub'
 	,	login_url:	'/initlogin/github'
-//	,	logout_url:	'https:\x2F/www.github.com/logout'
+	,	logout_url:	'https:\x2F/www.github.com/logout'
 	});
 }
