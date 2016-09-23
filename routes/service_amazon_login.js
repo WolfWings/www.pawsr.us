@@ -75,12 +75,6 @@ var request = https.request(url, (response) => {
 	});
 	/* istanbul ignore next: No sane way to store valid Amazon creds, remainder is straight-forward */
 	response.on('end', () => {
-		console.log(response.statusCode);
-		console.log(buffer.toString('utf8'));
-
-		keyvalue.set(uuid, 'error:Unfinished code path');
-		return;
-
 		if (response.statusCode !== 200) {
 			keyvalue.set(uuid, 'error:' + response.statusCode);
 			return;
@@ -120,7 +114,7 @@ var request = https.request(url, (response) => {
 
 				var results = JSON.parse(buffer.toString('utf8'));
 
-				require('../utils/login_complete.js')(data.session.userid, 'Amazon', uuid, results.id, results.name);
+				require('../utils/login_complete.js')(data.session.userid, 'Amazon', uuid, results.user_id, results.name);
 			});
 		});
 		request.on('error', (e) => {

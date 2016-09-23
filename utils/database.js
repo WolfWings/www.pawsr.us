@@ -81,6 +81,22 @@ const schema_updates = {
 	 +	' SET title="Reddit", url_format="https:\x2F/www.reddit.com/u/%s", class="reddit", login="yes", internaldisplay=""'
 	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.0.reddit"'
 	]
+,	'0.1.0': [
+		'INSERT INTO versioning'
+	 +	' SET record = "0.1.0", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'ALTER TABLE services'
+	 +	' MODIFY COLUMN url_format VARCHAR(255)'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.1.0"'
+	]
+,	'0.1.amazon': [
+		'INSERT INTO versioning'
+	 +	' SET record = "0.1.amazon", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'INSERT INTO services'
+	 +	' SET title="Amazon", url_format=NULL, class="amazon", login="yes", internaldisplay=""'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.1.amazon"'
+	]
 };
 
 // This function sends all updates required to the database
