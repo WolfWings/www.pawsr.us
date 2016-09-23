@@ -93,8 +93,6 @@ request.end();
 			data.session = {};
 			console.log('Testing /initlogin/twitter');
 			routine(data, res);
-
-			return 5000;
 		}
 	});
 }
