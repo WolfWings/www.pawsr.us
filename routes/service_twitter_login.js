@@ -92,7 +92,6 @@ var request = https.request(url, (response) => {
 	response.on('data', (chunk) => {
 		buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 	});
-	/* istanbul ignore next: No sane way to store valid Twitter creds, remainder is straight-forward */
 	response.on('end', () => {
 		if (response.statusCode !== 200) {
 			keyvalue.set(uuid, 'error:' + response.statusCode);
@@ -104,7 +103,6 @@ var request = https.request(url, (response) => {
 		require('../utils/login_complete.js')(data.session.userid, 'Twitter', uuid, results.user_id, results.screen_name);
 	});
 });
-/* istanbul ignore next: No way to force CURL errors */
 request.on('error', (e) => {
 	keyvalue.set(uuid, 'error:Twitter API request failure.');
 	console.log(`Problem with request: ${e.message}`);

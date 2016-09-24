@@ -52,7 +52,6 @@ var url = {
 var request = https.request(url, (response) => {
 	console.log('response');
 	var buffer = Buffer.alloc(0);
-	/* istanbul ignore if: No convenient way to plumb invalid twitter credentials in */
 	if (response.statusCode !== 200) {
 		keyvalue.delete('twitter_uuid_' + uuid);
 		return;
@@ -65,20 +64,17 @@ var request = https.request(url, (response) => {
 	response.on('end', () => {
 		var results = querystring.parse(buffer.toString('utf8'));
 		try {
-			/* istanbul ignore if: No convenient way to plumb invalid twitter credentials in */
 			if (results['oauth_callback_confirmed'] !== 'true') {
 				throw new TypeError('Twitter oauth_callback_confirmed not true!');
 			}
 			keyvalue.set('twitter_uuid_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
 		} catch (err) {
-			/* istanbul ignore next: No convenient way to plumb invalid twitter credentials in */
 			keyvalue.set('twitter_uuid_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
 		}
 
 	});
 });
 request.on('error', (e) => {
-	/* istanbul ignore next: Required curl/coding error to trigger */
 	console.log(`Problem with request: ${e.message}`);
 });
 request.write(querystring.stringify(params));
