@@ -37,7 +37,8 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 	const service = serviceTitle.toLowerCase();
 
 	try {
-		if (data.query.state !== data.session[service + '_uuid']) {
+		if ((data.query.state !== data.session[service + '_uuid'])
+		 || (typeof data.query.state === 'undefined')) {
 			throw Error('Nonce/State Mismatch - CSRF attack?');
 		}
 		if (typeof data.query.code === 'undefined') {
@@ -45,7 +46,6 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 		}
 	} catch (err) {
 		console.log(serviceTitle + ': ' + err.message);
-		console.log(err.stacktrace);
 
 		delete(data.session[service + '_uuid']);
 
