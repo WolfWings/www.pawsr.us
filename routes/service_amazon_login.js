@@ -1,10 +1,6 @@
 const serviceTitle = 'Amazon';
 const service = serviceTitle.toLowerCase();
 
-const querystring = require('querystring');
-const https = require('https');
-
-const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services[service];
 const oauth = require('../utils/oauth.js');
 

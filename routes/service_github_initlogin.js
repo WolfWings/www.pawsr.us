@@ -1,9 +1,6 @@
 const serviceTitle = 'GitHub';
 const service = serviceTitle.toLowerCase();
 
-const querystring = require('querystring');
-
-const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services[service];
 const oauth = require('../utils/oauth.js');
 
