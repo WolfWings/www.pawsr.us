@@ -1,4 +1,4 @@
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	const fs = require('fs');
 	const loggedout_html = fs.readFileSync('./static/homepage/loggedout.html').toString('utf8');
 	const loggedin_html = fs.readFileSync('./static/homepage/loggedin.html').toString('utf8');

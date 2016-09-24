@@ -1,7 +1,7 @@
 const keyvalue = require('../utils/keyvalue.js');
 const templating = require('../utils/templating.js');
 
-exports.register = (endpoints) => {
+module.exports = (endpoints) => {
 	console.log('Registering /login');
 	endpoints.push({
 		uri: '/login'

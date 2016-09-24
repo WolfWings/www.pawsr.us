@@ -1,4 +1,4 @@
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	console.log('Adding Twitter service');
 	shared_data.services.push({
 		name:		'Twitter'

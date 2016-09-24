@@ -4,7 +4,7 @@ const service = serviceTitle.toLowerCase();
 const secrets = require('../secrets.js').services[service];
 const oauth = require('../utils/oauth.js');
 
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	console.log('Registering /initlogin/' + service);
 	endpoints.push({
 		uri: '/initlogin/' + service

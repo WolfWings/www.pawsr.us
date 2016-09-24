@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	const ico = fs.readFileSync('./static/favicon/favicon.ico');
 	console.log('Registering /favicon.ico');
 	endpoints.push({

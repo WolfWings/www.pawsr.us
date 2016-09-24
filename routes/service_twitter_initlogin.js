@@ -5,7 +5,7 @@ const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 const oauth = require('../utils/oauth.js');
 
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	console.log('Registering /initlogin/twitter');
 	endpoints.push({
 		uri: '/initlogin/twitter'

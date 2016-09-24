@@ -1,4 +1,4 @@
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	const fs = require('fs');
 	console.log('Loading HTML page boilerplate components');
 	shared_data.boilerplate = {

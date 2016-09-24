@@ -26,7 +26,7 @@ fs.readdirSync(__dirname).forEach((file) => {
 	 && (path.extname(file) === '.js')
 	 && (file !== 'index.js')
 	   ) {
-		require(path.join(__dirname, file)).register(endpoints, shared_data);
+		require(path.join(__dirname, file))(endpoints, shared_data);
 	}
 });
 

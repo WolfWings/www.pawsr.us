@@ -5,7 +5,7 @@ const templating = require('../utils/templating.js');
 const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services.twitter;
 
-exports.register = (endpoints, shared_data) => {
+module.exports = (endpoints, shared_data) => {
 	console.log('Registering /preauth/twitter');
 	endpoints.push({
 		uri: '/preauth/twitter'
