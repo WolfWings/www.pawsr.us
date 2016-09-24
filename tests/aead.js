@@ -1,22 +1,14 @@
-var proc = require('process');
 var aead = require('../utils/aead.js');
 var crypto = require('crypto');
 
-var loop, password, encrypted, decrypted;
-
-console.log('Generating random data to use for testing');
-
-var fullpassword = crypto.randomBytes(100 * 32);
-var fulltext = crypto.randomBytes(100 * 1000);
-
-console.log('Performing 100 unique encryption tests');
+console.log('Performing 100 unique and random encryption tests');
 
 console.time('aead');
-for (loop = 0; loop < 100; loop++) {
-	var text = fulltext.slice(loop * 1000, (loop + 1) * 1000).toString('base64');
-	password = fullpassword.slice(loop * 32, (loop + 1) * 32);
-	encrypted = aead.encrypt(text, password);
-	decrypted = aead.decrypt(encrypted, password);
+for (var loop = 0; loop < 100; loop++) {
+	var text = crypto.randomBytes(1000).toString('base64');
+	var password = crypto.randomBytes(32);
+	var encrypted = aead.encrypt(text, password);
+	var decrypted = aead.decrypt(encrypted, password);
 	if (decrypted !== text) {
 		console.log('<' + password.toString('hex') + '>');
 		console.log('[' + text + ']');

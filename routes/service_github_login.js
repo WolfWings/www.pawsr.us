@@ -29,29 +29,10 @@ oauth.oauth2_login(
 		}
 	,	test_code_coverage: (routine, res, raw_data) => {
 			var data;
-			console.log('Testing /login/' + service + ' w/ empty data');
+			console.log('Testing /login/' + service);
 			data = JSON.parse(raw_data);
 			data.query = {};
 			data.session = {};
-			routine(data, res);
-
-			console.log('Testing /login/' + service + ' with mismatched Nonce/State');
-			data = JSON.parse(raw_data);
-			data.query = {
-				state: '0'
-			};
-			data.session = {};
-			data.session[service + '_uuid'] = '1';
-			routine(data, res);
-
-			console.log('Testing /login/' + service + ' with matching initial data');
-			data = JSON.parse(raw_data);
-			data.query = {
-				state: '2'
-			,	code: '2'
-			};
-			data.session = {};
-			data.session[service + '_uuid'] = '2';
 			routine(data, res);
 		}
 	});
