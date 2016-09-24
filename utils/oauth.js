@@ -94,7 +94,6 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 		response.on('data', (chunk) => {
 			buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
 		});
-		/* istanbul ignore next: No sane way to store valid creds, remainder is straight-forward */
 		response.on('end', () => {
 			if (response.statusCode !== 200) {
 				keyvalue.set(uuid, 'error:' + response.statusCode);
@@ -140,7 +139,6 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 			request.end();
 		});
 	});
-	/* istanbul ignore next: No way to force CURL errors */
 	request.on('error', (e) => {
 		keyvalue.set(uuid, 'error:' + serviceTitle + ' API request failure.');
 		console.log(`Problem with request: ${e.message}`);
