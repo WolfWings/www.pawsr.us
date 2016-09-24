@@ -153,17 +153,17 @@ request.end();
 				state: '0'
 			};
 			data.session = {};
-			data.session[service + '_uuid'] = 1;
+			data.session[service + '_uuid'] = '1';
 			routine(data, res);
 
 			console.log('Testing /login/' + service + ' with matching initial data');
 			data = JSON.parse(raw_data);
 			data.query = {
-				state: '0'
-			,	code: '0'
+				state: '2'
+			,	code: '2'
 			};
 			data.session = {};
-			data.session[service + '_uuid'] = 0;
+			data.session[service + '_uuid'] = '2';
 			routine(data, res);
 		}
 	});
