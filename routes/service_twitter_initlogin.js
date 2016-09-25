@@ -17,7 +17,6 @@ module.exports = (endpoints, shared_data) => {
 
 
 var uuid = oauth.nonce();
-var nonce = oauth.nonce();
 keyvalue.set(service + '_uuid_' + uuid, 'wip');
 data.session[service + '_uuid'] = uuid;
 res.statusCode = 307;
@@ -28,7 +27,7 @@ res.end();
 var params = {
 	oauth_callback:         'https:\x2F/www.pawsr.us/login/' + service + '?state=' + uuid + '#'
 ,	oauth_consumer_key:     secrets.oauthConsumerKey
-,	oauth_nonce:            nonce
+,	oauth_nonce:            oauth.nonce()
 ,	oauth_signature_method: 'HMAC-SHA1'
 ,	oauth_timestamp:        Math.floor(Date.now() / 1000).toString()
 ,	oauth_version:          '1.0'
