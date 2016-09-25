@@ -43,16 +43,28 @@ function do_tests(port) {
 	const invalid_site = 'https:\x2F/invalid.invalid/';
 	const localhost = 'https:\x2F/localhost:' + port + '/';
 
+	console.log('Testing OAuth2 login initialization');
+
+	data = JSON.parse(base_data);
+	oauth.oauth2_initlogin(
+		data
+	,	fake_res
+	,	'_test_OAuth2_Init'
+	,	'Invalid'
+	,	'/'
+	,	'Invalid'
+	);
+
 	console.log('Testing OAuth2 valid request w/ auth');
 
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_valid_uuid = '0';
+	data.session._test_oauth2_valid_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid_valid'
+	,	'_test_OAuth2_Valid'
 	,	fake_secrets
 	,	localhost + 'access-token'
 	,	fake_secrets
@@ -67,7 +79,7 @@ function do_tests(port) {
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_CSRF'
 	,	fake_secrets
 	,	invalid_site
 	,	null
@@ -80,11 +92,11 @@ function do_tests(port) {
 
 	data = JSON.parse(base_data);
 	data.query.state = '0';
-	data.session.invalid_uuid = '0';
+	data.session._test_oauth2_no_code_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_No_Code'
 	,	fake_secrets
 	,	invalid_site
 	,	null
@@ -98,11 +110,11 @@ function do_tests(port) {
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_uuid = '0';
+	data.session._test_oauth2_profile_curl_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_Profile_CURL'
 	,	fake_secrets
 	,	localhost + 'access-token'
 	,	null
@@ -116,11 +128,11 @@ function do_tests(port) {
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_uuid = '0';
+	data.session._test_oauth2_access_token_curl_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_Access_Token_CURL'
 	,	fake_secrets
 	,	invalid_site
 	,	null
@@ -134,11 +146,11 @@ function do_tests(port) {
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_uuid = '0';
+	data.session._test_oauth2_profile_status_code_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_Profile_Status_Code'
 	,	fake_secrets
 	,	localhost + 'access-token'
 	,	null
@@ -152,11 +164,11 @@ function do_tests(port) {
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_uuid = '0';
+	data.session._test_oauth2_access_token_status_code_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_Access_Token_Status_Code'
 	,	fake_secrets
 	,	localhost + 'status-code'
 	,	null
@@ -170,11 +182,11 @@ function do_tests(port) {
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_uuid = '0';
+	data.session._test_oauth2_access_token_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'_test_OAuth2_Access_Token'
 	,	fake_secrets
 	,	localhost + 'missing-access-token'
 	,	null

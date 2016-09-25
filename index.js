@@ -36,7 +36,7 @@ server.on('request', (raw, res) => {
 	const querystring = require('querystring');
 	const server_key = Buffer.from(require('./secrets.js').server_key, 'base64');
 
-	var parsedurl = require('url').parse(raw.url, true);
+	var parsedurl = require('url').parse(raw.url, true, true);
 	var uri = parsedurl.pathname;
 	var route = endpoints.find(i => i.uri === uri);
 	var tempdata;
@@ -73,7 +73,6 @@ server.on('request', (raw, res) => {
 	if (typeof cookies['session'] !== 'undefined') {
 		try {
 			var decoded = '{' + aead.decrypt(cookies['session'], server_key).slice(12, -12) + '}';
-			console.log('Session: ' + decoded);
 			session = JSON.parse(decoded, JSON_utils.JSONreviver);
 			if (typeof session.userid === 'string') {
 				session.userid = parseInt(session.userid);
@@ -90,7 +89,7 @@ server.on('request', (raw, res) => {
 	// Centralized here to guarantee we only use one minimal and valid session value
 	// And yes, this key is valid. :)
 	res.deleteSession = () => {
-		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Secure; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
 	// Utility DRY function for storing an updated session-state
@@ -113,7 +112,7 @@ server.on('request', (raw, res) => {
 			console.log(e);
 			console.log(session);
 		} finally {
-			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Path=/; Domain=.pawsr.us');
+			res.setHeader('Set-Cookie', 'session=' + sessioncookie + '; HttpOnly; Secure; Path=/; Domain=.pawsr.us');
 		}
 	}
 

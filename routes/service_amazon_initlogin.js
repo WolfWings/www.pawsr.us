@@ -4,6 +4,7 @@ const service = serviceTitle.toLowerCase();
 const secrets = require('../secrets.js').services[service];
 const oauth = require('../utils/oauth.js');
 
+// istanbul ignore next: Nothing to 'test' here, it's all in utils/oauth.js
 module.exports = (endpoints, shared_data) => {
 	console.log('Registering /initlogin/' + service);
 	endpoints.push({
@@ -23,13 +24,6 @@ oauth.oauth2_initlogin(
 
 
 
-		}
-	,	test_code_coverage: (routine, res, raw_data) => {
-			var data;
-			data = JSON.parse(raw_data);
-			data.session = {};
-			console.log('Testing /initlogin/' + service);
-			routine(data, res);
 		}
 	});
 }
