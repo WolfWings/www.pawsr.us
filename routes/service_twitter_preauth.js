@@ -1,33 +1,36 @@
+const serviceTitle = 'Twitter';
+const service = serviceTitle.toLowerCase();
+
 const querystring = require('querystring');
 const https = require('https');
 
 const templating = require('../utils/templating.js');
 const keyvalue = require('../utils/keyvalue.js');
-const secrets = require('../secrets.js').services.twitter;
+const secrets = require('../secrets.js').services[service];
 
 module.exports = (endpoints, shared_data) => {
-	console.log('Registering /preauth/twitter');
+	console.log('Registering /preauth/' + service);
 	endpoints.push({
-		uri: '/preauth/twitter'
+		uri: '/preauth/' + service
 	,	routine: (data, res) => {
 
 
 
-if (typeof data.session.twitter_uuid !== 'string') {
+if (typeof data.session[service + '_uuid'] !== 'string') {
 	res.statusCode = 307;
 	res.saveSession(data.session);
-	res.setHeader('Location', '/initlogin/twitter');
+	res.setHeader('Location', '/initlogin/' + service);
 	res.end();
 	return;
 }
 
-var uuid = data.session['twitter_uuid'];
+var uuid = data.session[service + '_uuid'];
 
-var state = keyvalue.get('twitter_uuid_' + uuid);
+var state = keyvalue.get(service + '_uuid_' + uuid);
 
 // If there is no such UUID on record, boot entirely. Possible replay attack.
 if (state === null) {
-	delete data.session['twitter_uuid'];
+	delete data.session[service + '_uuid'];
 	res.saveSession(data.session);
 	res.statusCode = 307;
 	res.setHeader('Location', '/');
@@ -39,24 +42,24 @@ if (state === null) {
 // Calls usually take 500ms or less.
 if (state === 'wip') {
 	res.write(data.boilerplate.pretitle);
-	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
-	res.write(templating.refresh(1, '/preauth/twitter'));
+	res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
+	res.write(templating.refresh(1, '/preauth/' + service));
 	res.write(data.boilerplate.prebody);
-	res.write('<p>Requesting unique login token from twitter...</p>');
+	res.write('<p>Requesting unique login token from ' + serviceTitle + '...</p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }
 
 // We no longer need the UUID record serverside, so purge it.
 // Note we do *NOT* update the client-side cookie yet, as we may need to add more data to it first.
-keyvalue.delete('twitter_uuid_' + uuid);
+keyvalue.delete(service + '_uuid_' + uuid);
 
 // Errored out? Save session, give a screen with a link, we're done.
 if (state.startsWith('error:')) {
-	delete data.session['twitter_uuid'];
+	delete data.session[service + '_uuid'];
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
-	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
+	res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
 	res.write('<p><b>Error!</b> ' + state.slice(6) + '</p>');
 	res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
@@ -66,10 +69,10 @@ if (state.startsWith('error:')) {
 
 // Unhandled state? Corruption possible, abort and provide a link.
 if (!state.startsWith('ready:')) {
-	delete data.session['twitter_uuid'];
+	delete data.session[service + '_uuid'];
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
-	res.write('<title>Twitter Pre-Login Authorizer - www.pawsr.us</title>');
+	res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
 	res.write('<p><b>Unknown State!</b></p>');
 	res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
@@ -80,8 +83,8 @@ if (!state.startsWith('ready:')) {
 // YAY, success! *partyfavors*
 // Store the two oauth token bits into the session, save it, and roll the redirect...
 var components = state.split(':');
-data.session['twitter_token_secret'] = components[1];
-data.session['twitter_token'] = components[2];
+data.session[service + '_token_secret'] = components[1];
+data.session[service + '_token'] = components[2];
 res.saveSession(data.session);
 res.statusCode = 307;
 res.setHeader('Location', 'https:\x2F/api.twitter.com/oauth/authenticate?oauth_token=' + components[2] + '#');
@@ -92,55 +95,45 @@ res.end();
 		}
 	,	test_code_coverage: (routine, res, raw_data) => {
 			var data;
+
 			data = JSON.parse(raw_data);
-			data.session = {
-			};
-			console.log('Testing /preauth/twitter with empty session');
+			data.session = {};
+			console.log('Testing /preauth/' + service + ' with empty session');
 			routine(data, res);
 
 			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '0'
-			};
-			keyvalue.delete('twitter_uuid_0');
-			console.log('Testing /preauth/twitter with valid session but missing keyvalue');
+			data.session = {};
+			data.session[service + '_uuid'] = '0';
+			console.log('Testing /preauth/' + service + ' with missing keyvalue');
 			routine(data, res);
 
 			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '1'
-			};
-			keyvalue.set('twitter_uuid_1', 'wip');
-			console.log('Testing /preauth/twitter with valid session and keyvalue "wip"');
+			data.session = {};
+			data.session[service + '_uuid'] = '1';
+			keyvalue.set(service + '_uuid_1', 'wip');
+			console.log('Testing /preauth/' + service + ' with keyvalue: wip');
 			routine(data, res);
-			keyvalue.delete('twitter_uuid_1');
 
 			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '2'
-			};
-			keyvalue.set('twitter_uuid_2', 'error:Testing error');
-			console.log('Testing /preauth/twitter with valid session and keyvalue "error"');
+			data.session = {};
+			data.session[service + '_uuid'] = '2';
+			keyvalue.set(service + '_uuid_2', 'error:_');
+			console.log('Testing /preauth/' + service + ' with keyvalue: error:_');
 			routine(data, res);
-			keyvalue.delete('twitter_uuid_2');
 
 			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '3'
-			};
-			keyvalue.set('twitter_uuid_3', 'invalid');
-			console.log('Testing /preauth/twitter with valid session and keyvalue "invalid"');
+			data.session = {};
+			data.session[service + '_uuid'] = '3';
+			keyvalue.set(service + '_uuid_3', 'garbage');
+			console.log('Testing /preauth/' + service + ' with keyvalue: garbage');
 			routine(data, res);
-			keyvalue.delete('twitter_uuid_3');
 
 			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '4'
-			};
-			keyvalue.set('twitter_uuid_4', 'ready:5:6');
-			console.log('Testing /preauth/twitter with valid session and keyvalue "ready"');
+			data.session = {};
+			data.session[service + '_uuid'] = '4';
+			keyvalue.set(service + '_uuid_4', 'ready:5:6');
+			console.log('Testing /preauth/' + service + ' with keyvalue: ready:5:6');
 			routine(data, res);
-			keyvalue.delete('twitter_uuid_4');
 		}
 	});
 }

@@ -1,29 +1,32 @@
+const serviceTitle = 'Twitter';
+const service = serviceTitle.toLowerCase();
+
 const querystring = require('querystring');
 const https = require('https');
 
 const keyvalue = require('../utils/keyvalue.js');
-const secrets = require('../secrets.js').services.twitter;
+const secrets = require('../secrets.js').services[service];
 const oauth = require('../utils/oauth.js');
 
 module.exports = (endpoints, shared_data) => {
-	console.log('Registering /initlogin/twitter');
+	console.log('Registering /initlogin/' + service);
 	endpoints.push({
-		uri: '/initlogin/twitter'
+		uri: '/initlogin/' + service
 	,	routine: (data, res) => {
 
 
 
 var uuid = oauth.nonce();
 var nonce = oauth.nonce();
-keyvalue.set('twitter_uuid_' + uuid, 'wip');
-data.session['twitter_uuid'] = uuid;
+keyvalue.set(service + '_uuid_' + uuid, 'wip');
+data.session[service + '_uuid'] = uuid;
 res.statusCode = 307;
 res.saveSession(data.session);
-res.setHeader('Location', '/preauth/twitter');
+res.setHeader('Location', '/preauth/' + service);
 res.end();
 
 var params = {
-	oauth_callback:         'https:\x2F/www.pawsr.us/login/twitter?state=' + uuid + '#'
+	oauth_callback:         'https:\x2F/www.pawsr.us/login/' + service + '?state=' + uuid + '#'
 ,	oauth_consumer_key:     secrets.oauthConsumerKey
 ,	oauth_nonce:            nonce
 ,	oauth_signature_method: 'HMAC-SHA1'
@@ -53,7 +56,7 @@ var request = https.request(url, (response) => {
 	console.log('response');
 	var buffer = Buffer.alloc(0);
 	if (response.statusCode !== 200) {
-		keyvalue.delete('twitter_uuid_' + uuid);
+		keyvalue.delete(service + '_uuid_' + uuid);
 		return;
 	}
 
@@ -63,13 +66,14 @@ var request = https.request(url, (response) => {
 	});
 	response.on('end', () => {
 		var results = querystring.parse(buffer.toString('utf8'));
+		console.log(results);
 		try {
 			if (results['oauth_callback_confirmed'] !== 'true') {
-				throw new TypeError('Twitter oauth_callback_confirmed not true!');
+				throw new TypeError(serviceTitle + ' oauth_callback_confirmed not true!');
 			}
-			keyvalue.set('twitter_uuid_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
+			keyvalue.set(service + '_uuid_' + uuid, 'ready:' + results['oauth_token_secret'] + ':' + results['oauth_token']);
 		} catch (err) {
-			keyvalue.set('twitter_uuid_' + uuid, 'error:Twitter service failed to return a token. Please try again later.');
+			keyvalue.set(service + '_uuid_' + uuid, 'error:' + serviceTitle + ' service failed to return a token. Please try again later.');
 		}
 
 	});
@@ -87,7 +91,7 @@ request.end();
 			var data;
 			data = JSON.parse(raw_data);
 			data.session = {};
-			console.log('Testing /initlogin/twitter');
+			console.log('Testing /initlogin/' + service);
 			routine(data, res);
 		}
 	});

@@ -1,51 +1,54 @@
+const serviceTitle = 'Twitter';
+const service = serviceTitle.toLowerCase();
+
 const querystring = require('querystring');
 const https = require('https');
 
 const keyvalue = require('../utils/keyvalue.js');
-const secrets = require('../secrets.js').services.twitter;
+const secrets = require('../secrets.js').services[service];
 const oauth = require('../utils/oauth.js');
 
 module.exports = (endpoints, shared_data) => {
-	console.log('Registering /login/twitter');
+	console.log('Registering /login/' + service);
 	endpoints.push({
-		uri: '/login/twitter'
+		uri: '/login/' + service
 	,	routine: (data, res) => {
 
 
 
 try {
-	if (data.query.state !== data.session.twitter_uuid) {
+	if (data.query.state !== data.session[service + '_uuid']) {
 		throw Error('Nonce/State Mismatch - CSRF attack?');
 	}
-	if (data.query.oauth_token !== data.session.twitter_token) {
+	if (data.query.oauth_token !== data.session[service + '_token']) {
 		throw Error('OAuth Token Mismatch - Replay attack?');
 	}
 	if (typeof data.query.oauth_verifier === 'undefined') {
 		throw Error('OAuth Verifier missing!');
 	}
 } catch (err) {
-	console.log('Twitter: ' + err.message);
+	console.log(serviceTitle + ': ' + err.message);
 	console.log(err.stacktrack);
 
-	delete(data.session.twitter_uuid);
-	delete(data.session.twitter_token);
-	delete(data.session.twitter_token_secret);
+	delete(data.session[service + '_uuid']);
+	delete(data.session[service + '_token']);
+	delete(data.session[service + '_token_secret']);
 
 	res.saveSession(data.session);
 	res.write(data.boilerplate.pretitle);
-	res.write('<title>Twitter Login Callback - www.pawsr.us</title>');
+	res.write('<title>' + serviceTitle + ' Login Callback - www.pawsr.us</title>');
 	res.write(data.boilerplate.prebody);
-	res.write('<p><b>Error:</b> Twitter did not successfully login.</p>');
+	res.write('<p><b>Error:</b> ' + serviceTitle + ' did not successfully login.</p>');
 	res.write('<p><a href=\x22/\x22>Click here to go back to the homepage, and try again later.</a></p>');
 	res.write(data.boilerplate.postbody);
 	return;
 }
 
-var twitter_token_secret = data.session.twitter_token_secret;
-var uuid = 'login_twitter_' + data.session.twitter_uuid;
+var token_secret = data.session[service + '_token_secret'];
+var uuid = 'login_' + service + '_' + data.session[service + '_uuid'];
 keyvalue.set(uuid, 'wip');
-delete(data.session.twitter_token);
-delete(data.session.twitter_token_secret);
+delete(data.session[service + '_token']);
+delete(data.session[service + '_token_secret']);
 
 res.statusCode = 307;
 res.saveSession(data.session);
@@ -67,7 +70,7 @@ var authorization = 'OAuth oauth_signature=' + oauth.oauth1_signature(
 ,	'https:\x2F/api.twitter.com/oauth/access_token'
 ,	params
 ,	secrets.secretKey
-,	twitter_token_secret
+,	token_secret
 ,	'sha1');
 
 var url = {
@@ -100,11 +103,11 @@ var request = https.request(url, (response) => {
 
 		var results = querystring.parse(buffer.toString('utf8'));
 
-		require('../utils/login_complete.js')(data.session.userid, 'Twitter', uuid, results.user_id, results.screen_name);
+		require('../utils/login_complete.js')(data.session.userid, serviceTitle, uuid, results.user_id, results.screen_name);
 	});
 });
 request.on('error', (e) => {
-	keyvalue.set(uuid, 'error:Twitter API request failure.');
+	keyvalue.set(uuid, 'error:' + serviceTitle + ' API request failure.');
 	console.log(`Problem with request: ${e.message}`);
 });
 request.write(querystring.stringify(params));
@@ -115,45 +118,42 @@ request.end();
 		}
 	,	test_code_coverage: (routine, res, raw_data) => {
 			var data;
-			console.log('Testing /login/twitter w/ empty data');
+			console.log('Testing /login/' + service + ' w/ empty data');
 			data = JSON.parse(raw_data);
 			data.query = {};
 			data.session = {};
 			routine(data, res);
 
-			console.log('Testing /login/twitter with mismatched Nonce/State');
+			console.log('Testing /login/' + service + ' with mismatched Nonce/State');
 			data = JSON.parse(raw_data);
 			data.query = {
 				state: '0'
 			};
-			data.session = {
-				twitter_uuid: '1'
-			};
+			data.session = {};
+			data.session[service + '_uuid'] = '1';
 			routine(data, res);
 
-			console.log('Testing /login/twitter with Replay Attach');
+			console.log('Testing /login/' + service + ' with Replay Attach');
 			data = JSON.parse(raw_data);
 			data.query = {
 				state: '0'
 			,	oauth_token: '0'
 			};
-			data.session = {
-				twitter_uuid: '0'
-			,	twitter_token: '1'
-			};
+			data.session = {};
+			data.session[service + '_uuid'] = '0';
+			data.session[service + '_token'] = '1';
 			routine(data, res);
 
-			console.log('Testing /login/twitter with matching initial data');
+			console.log('Testing /login/' + service + ' with matching initial data');
 			data = JSON.parse(raw_data);
 			data.query = {
 				state: '0'
 			,	oauth_token: '0'
 			,	oauth_verifier: '0'
 			};
-			data.session = {
-				twitter_uuid: '0'
-			,	twitter_token: '0'
-			};
+			data.session = {};
+			data.session[service + '_uuid'] = '0';
+			data.session[service + '_token'] = '0';
 			routine(data, res);
 		}
 	});
