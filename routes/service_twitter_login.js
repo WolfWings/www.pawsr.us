@@ -6,7 +6,8 @@ const https = require('https');
 
 const keyvalue = require('../utils/keyvalue.js');
 const secrets = require('../secrets.js').services[service];
-const oauth = require('../utils/oauth.js');
+const oauth = require('../utils/oauth1.js');
+const nonce = require('../utils/nonce.js');
 
 module.exports = (endpoints, shared_data) => {
 	console.log('Registering /login/' + service);
@@ -57,7 +58,7 @@ res.end();
 
 var params = {
 	oauth_consumer_key:     secrets.oauthConsumerKey
-,	oauth_nonce:            oauth.nonce()
+,	oauth_nonce:            nonce()
 ,	oauth_signature_method: 'HMAC-SHA1'
 ,	oauth_timestamp:        Math.floor(Date.now() / 1000).toString()
 ,	oauth_token:            data.query.oauth_token

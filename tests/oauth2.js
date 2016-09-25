@@ -6,7 +6,7 @@ if (typeof global.database === 'undefined') {
 	}
 }
 
-const oauth = require('../utils/oauth.js');
+const oauth = require('../utils/oauth2.js');
 const https = require('https');
 
 // Disable certificate checking as we're using a self-signed localhost cert

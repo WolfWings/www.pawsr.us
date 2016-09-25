@@ -2,7 +2,7 @@ const serviceTitle = 'Twitter';
 const service = serviceTitle.toLowerCase();
 
 const secrets = require('../secrets.js').services[service];
-const oauth = require('../utils/oauth.js');
+const oauth = require('../utils/oauth1.js');
 
 module.exports = (endpoints, shared_data) => {
 	console.log('Adding ' + serviceTitle + ' service');

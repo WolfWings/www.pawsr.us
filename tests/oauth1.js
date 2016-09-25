@@ -6,7 +6,7 @@ if (typeof global.database === 'undefined') {
 	}
 }
 
-const oauth = require('../utils/oauth.js');
+const oauth = require('../utils/oauth1.js');
 const https = require('https');
 const keyvalue = require('../utils/keyvalue.js');
 const querystring = require('querystring');
