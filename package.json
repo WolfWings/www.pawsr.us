@@ -7,7 +7,8 @@
 , "author": "Wolf <wolfwings@gmail.com>"
 , "license": "UNLICENSED"
 , "scripts": {
-    "test": "node_modules/.bin/istanbul cover tests/"
+    "pretest": "rm -rf coverage"
+  , "test": "node_modules/.bin/istanbul cover tests/"
   , "start": "node ./"
   }
 , "dependencies": {
