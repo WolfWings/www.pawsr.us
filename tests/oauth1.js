@@ -113,6 +113,78 @@ function do_tests(port) {
 	data.session['_test_oauth1_uuid'] = '4';
 	keyvalue.set('_test_oauth1_uuid_4', 'ready:5:6');
 	oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+
+	console.log('Testing OAuth 1.0a post-auth with empty data');
+
+	var data;
+	data = JSON.parse(base_data);
+	data.query = {};
+	data.session = {};
+	oauth.oauth1_login(data, fake_res, '_test_oauth1', fake_secrets, invalid_site, '', '');
+
+	console.log('Testing OAuth 1.0a post-auth with CSRF');
+
+	data = JSON.parse(base_data);
+	data.query = {
+		state: '0'
+	,	oauth_token: '1'
+	,	oauth_verifier: '2'
+	};
+	data.session = {};
+	data.session['_test_oauth1_uuid'] = '3';
+	oauth.oauth1_login(data, fake_res, '_test_oauth1', fake_secrets, invalid_site, '', '');
+
+	console.log('Testing OAuth 1.0a post-auth with mismatched tokens');
+
+	data = JSON.parse(base_data);
+	data.query = {
+		state: '4'
+	,	oauth_token: '5'
+	,	oauth_verifier: '6'
+	};
+	data.session = {};
+	data.session['_test_oauth1_uuid'] = '4';
+	data.session['_test_oauth1_token'] = '7';
+	oauth.oauth1_login(data, fake_res, '_test_oauth1', fake_secrets, invalid_site, '', '');
+
+	console.log('Testing OAuth 1.0a post-auth with profile CURL error');
+
+	data = JSON.parse(base_data);
+	data.query = {
+		state: '8'
+	,	oauth_token: '9'
+	,	oauth_verifier: '10'
+	};
+	data.session = {};
+	data.session['_test_oauth1_uuid'] = '8';
+	data.session['_test_oauth1_token'] = '9';
+	oauth.oauth1_login(data, fake_res, '_test_oauth1', fake_secrets, invalid_site, '', '');
+
+	console.log('Testing OAuth 1.0a post-auth with profile status code');
+
+	data = JSON.parse(base_data);
+	data.query = {
+		state: '8'
+	,	oauth_token: '9'
+	,	oauth_verifier: '10'
+	};
+	data.session = {};
+	data.session['_test_oauth1_uuid'] = '8';
+	data.session['_test_oauth1_token'] = '9';
+	oauth.oauth1_login(data, fake_res, '_test_oauth1', fake_secrets, localhost + 'status-code', '', '');
+
+	console.log('Testing OAuth 1.0a post-auth with valid data');
+
+	data = JSON.parse(base_data);
+	data.query = {
+		state: '8'
+	,	oauth_token: '9'
+	,	oauth_verifier: '10'
+	};
+	data.session = {};
+	data.session['_test_oauth1_uuid'] = '8';
+	data.session['_test_oauth1_token'] = '9';
+	oauth.oauth1_login(data, fake_res, '_test_oauth1', fake_secrets, localhost + 'valid', '_invalid_', '_invalid_');
 }
 
 function server_request(req, res) {
@@ -134,6 +206,12 @@ function server_request(req, res) {
 			break;
 		case '/status-code':
 			res.statusCode = 403;
+			break;
+		case '/valid':
+			res.statusCode = 200;
+			res.write(querystring.stringify({
+				_invalid_: '_test_invalid_test_'
+			}));
 			break;
 		default:
 			console.log(req.url);

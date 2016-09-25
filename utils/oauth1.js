@@ -6,7 +6,7 @@ const keyvalue = require('./keyvalue.js');
 const templating = require('./templating.js');
 const nonce = require('./nonce.js');
 
-exports.oauth1_signature = (method, url, params, key, token, hash) => {
+function oauth1_signature(method, url, params, key, token, hash) {
 	var ordered = '';
 	var keys = Object.keys(params).sort().forEach((key) => {
 		ordered = ordered + '&' + querystring.escape(key) + '=' + querystring.escape(params[key]);
@@ -35,7 +35,14 @@ exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
 	,	oauth_version:          '1.0'
 	};
 
-	var authorization = 'OAuth oauth_signature=' + exports.oauth1_signature('POST', tokenURL, params, secrets.secretKey, '', 'sha1');
+	var authorization = 'OAuth oauth_signature=' + oauth1_signature(
+		'POST'
+	,	tokenURL
+	,	params
+	,	secrets.secretKey
+	,	''
+	,	'sha1'
+	);
 
 	var url = _url.parse(tokenURL, false, true);
 	url.method = 'POST';
@@ -150,4 +157,101 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL) => {
 	res.statusCode = 307;
 	res.setHeader('Location', loginURL + '?oauth_token=' + components[2] + '#');
 	res.end();
+};
+
+exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id, screen_name) => {
+	var service = serviceTitle.toLowerCase();
+
+	try {
+		if ((typeof data.query.state !== 'string')
+		 || (typeof data.query.oauth_token !== 'string')
+		 || (typeof data.query.oauth_verifier !== 'string')) {
+			throw Error('OAuth callback query components missing!');
+		}
+		if (data.query.state !== data.session[service + '_uuid']) {
+			throw Error('Nonce/State Mismatch - CSRF attack?');
+		}
+		if (data.query.oauth_token !== data.session[service + '_token']) {
+			throw Error('OAuth Token Mismatch - Replay attack?');
+		}
+	} catch (err) {
+		console.log(serviceTitle + ': ' + err.message);
+		console.log(err.stacktrack);
+
+		delete(data.session[service + '_uuid']);
+		delete(data.session[service + '_token']);
+		delete(data.session[service + '_token_secret']);
+
+		res.saveSession(data.session);
+		res.write(data.boilerplate.pretitle);
+		res.write('<title>' + serviceTitle + ' Login Callback - www.pawsr.us</title>');
+		res.write(data.boilerplate.prebody);
+		res.write('<p><b>Error:</b> ' + serviceTitle + ' did not successfully login.</p>');
+		res.write('<p><a href=\x22/\x22>Click here to go back to the homepage, and try again later.</a></p>');
+		res.write(data.boilerplate.postbody);
+		return;
+	}
+
+	var token_secret = data.session[service + '_token_secret'];
+	var uuid = 'login_' + service + '_' + data.session[service + '_uuid'];
+	keyvalue.set(uuid, 'wip');
+	delete(data.session[service + '_token']);
+	delete(data.session[service + '_token_secret']);
+
+	res.statusCode = 307;
+	res.saveSession(data.session);
+	res.setHeader('Location', '/login');
+	res.end();
+
+	var params = {
+		oauth_consumer_key:     secrets.oauthConsumerKey
+	,	oauth_nonce:            nonce()
+	,	oauth_signature_method: 'HMAC-SHA1'
+	,	oauth_timestamp:        Math.floor(Date.now() / 1000).toString()
+	,	oauth_token:            data.query.oauth_token
+	,	oauth_version:          '1.0'
+	,	oauth_verifier:         data.query.oauth_verifier
+	};
+
+	var authorization = 'OAuth oauth_signature=' + oauth1_signature(
+		'POST'
+	,	profileURL
+	,	params
+	,	secrets.secretKey
+	,	token_secret
+	,	'sha1');
+
+	url = _url.parse(profileURL);
+	url.method = 'POST';
+	url.agent = false;
+	url.headers = {
+		'Accept': '*\x2F*'
+	,	'Authorization': authorization
+	,	'Content-Type': 'application/x-www-form-urlencoded'
+	,	'User-Agent': data.user_agent
+	};
+
+	var request = https.request(url, (response) => {
+		var buffer = Buffer.alloc(0);
+		response.setEncoding('utf8');
+		response.on('data', (chunk) => {
+			buffer = Buffer.concat([buffer, Buffer.from(chunk, 'utf8')]);
+		});
+		response.on('end', () => {
+			if (response.statusCode !== 200) {
+				keyvalue.set(uuid, 'error:' + response.statusCode);
+				return;
+			}
+
+			var results = querystring.parse(buffer.toString('utf8'));
+
+			require('../utils/login_complete.js')(data.session.userid, serviceTitle, uuid, results[unique_id], results[screen_name]);
+		});
+	});
+	request.on('error', (e) => {
+		keyvalue.set(uuid, 'error:' + serviceTitle + ' API request failure.');
+		console.log(`Problem with request: ${e.message}`);
+	});
+	request.write(querystring.stringify(params));
+	request.end();
 };

@@ -37,4 +37,19 @@ module.exports = (endpoints, shared_data) => {
 			);
 		}
 	});
+
+	endpoints.push({
+		uri: '/login/' + service
+	,	routine: (data, res) => {
+			oauth.oauth1_login(
+				data
+			,	res
+			,	serviceTitle
+			,	secrets
+			,	'https:\x2F/api.twitter.com/oauth/access_token'
+			,	'user_id'
+			,	'screen_name'
+			);
+		}
+	});
 }
