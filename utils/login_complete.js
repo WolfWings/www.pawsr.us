@@ -1,4 +1,3 @@
-/* istanbul ignore next */
 const keyvalue = require('../utils/keyvalue.js');
 
 // This is a successful 'login' here
@@ -35,7 +34,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 	}
 
 	global.database.getConnection((err, conn) => {
-		/* istanbul ignore next */
 		function database_error() {
 			console.log(err);
 			keyvalue.set(uuid, 'error:Database error!');
@@ -55,7 +53,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 				,	screen_name
 				]
 			,	(err, result) => {
-				/* istanbul ignore if */
 				if (err) {
 					database_error();
 					return;
@@ -71,7 +68,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 				'INSERT INTO users'
 			 +	' VALUES ()'
 			,	(err, result) => {
-				/* istanbul ignore if */
 				if (err) {
 					database_error();
 					return;
@@ -104,7 +100,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 				,	service
 				]
 			,	(err, result) => {
-				/* istanbul ignore if */
 				if (err) {
 					database_error();
 					return;
@@ -117,7 +112,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 
 		function merge_users(old_user_id) {
 			conn.beginTransaction((err) => {
-				/* istanbul ignore if */
 				if (err) {
 					database_error();
 					return;
@@ -131,7 +125,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 					,	old_user_id
 					]
 				,	(err, result) => {
-					/* istanbul ignore if */
 					if (err) {
 						database_error();
 						return;
@@ -145,7 +138,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 						,	old_user_id
 						]
 					,	(err, result) => {
-						/* istanbul ignore if */
 						if (err) {
 							database_error();
 							return;
@@ -157,14 +149,12 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 						,	[	old_user_id
 							]
 						,	(err, result) => {
-							/* istanbul ignore if */
 							if (err) {
 								database_error();
 								return;
 							}
 
 							conn.commit((err) => {
-								/* istanbul ignore if */
 								if (err) {
 									database_error();
 									return;
@@ -178,7 +168,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 			});
 		}
 
-		/* istanbul ignore if */
 		if (err) {
 			database_error();
 			return;
@@ -193,7 +182,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 		 +	' AND identifier = ?'
 		,	[service, unique_id]
 		,	(err, rows, fields) => {
-			/* istanbul ignore if */
 			if (err) {
 				database_error();
 				return;

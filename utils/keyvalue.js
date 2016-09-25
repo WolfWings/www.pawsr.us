@@ -12,7 +12,6 @@ function mkdirSafe(dir) {
 	try {
 		fs.mkdirSync(dir);
 	} catch (err) {
-		/* istanbul ignore next */
 		if (err.code !== 'EEXIST') {
 			throw err;
 		}
@@ -32,7 +31,6 @@ mkdirSafe('./keyvalue');
 });
 
 var purged = false;
-/* istanbul ignore next: exitHandler's not detected by istanbul */
 function exitHandler(options, err) {
 	if (purged === false) {
 		purged = true;
@@ -73,7 +71,6 @@ exports.set = (key, value) => {
 	try {
 		fs.writeFileSync('./keyvalue/' + trueKey, value);
 	} catch (err) {
-		/* istanbul ignore next */
 		return;
 	}
 };
