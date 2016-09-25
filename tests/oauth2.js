@@ -48,15 +48,15 @@ function do_tests(port) {
 	data = JSON.parse(base_data);
 	data.query.state = '0';
 	data.query.code = '0';
-	data.session.invalid_uuid = '0';
+	data.session.invalid_valid_uuid = '0';
 	oauth.oauth2_login(
 		data
 	,	fake_res
-	,	'Invalid'
+	,	'Invalid_valid'
 	,	fake_secrets
-	,	localhost + 'outer'
+	,	localhost + 'access-token'
 	,	fake_secrets
-	,	localhost + 'inner'
+	,	localhost + 'profile'
 	,	'invalid'
 	,	'invalid'
 	);
@@ -93,7 +93,7 @@ function do_tests(port) {
 	,	'invalid'
 	);
 
-	console.log('Testing OAuth2 inner CURL error');
+	console.log('Testing OAuth2 profile CURL error');
 
 	data = JSON.parse(base_data);
 	data.query.state = '0';
@@ -104,14 +104,14 @@ function do_tests(port) {
 	,	fake_res
 	,	'Invalid'
 	,	fake_secrets
-	,	localhost + 'outer'
+	,	localhost + 'access-token'
 	,	null
 	,	invalid_site
 	,	'invalid'
 	,	'invalid'
 	);
 
-	console.log('Testing OAuth2 outer CURL error');
+	console.log('Testing OAuth2 access_token CURL error');
 
 	data = JSON.parse(base_data);
 	data.query.state = '0';
@@ -129,7 +129,7 @@ function do_tests(port) {
 	,	'invalid'
 	);
 
-	console.log('Testing OAuth2 inner status-code');
+	console.log('Testing OAuth2 profile status-code');
 
 	data = JSON.parse(base_data);
 	data.query.state = '0';
@@ -140,14 +140,14 @@ function do_tests(port) {
 	,	fake_res
 	,	'Invalid'
 	,	fake_secrets
-	,	localhost + 'outer'
+	,	localhost + 'access-token'
 	,	null
 	,	localhost + 'status-code'
 	,	'invalid'
 	,	'invalid'
 	);
 
-	console.log('Testing OAuth2 outer status-code');
+	console.log('Testing OAuth2 access_token status code');
 
 	data = JSON.parse(base_data);
 	data.query.state = '0';
@@ -176,7 +176,7 @@ function do_tests(port) {
 	,	fake_res
 	,	'Invalid'
 	,	fake_secrets
-	,	localhost + 'access-token'
+	,	localhost + 'missing-access-token'
 	,	null
 	,	localhost
 	,	'invalid'
@@ -187,19 +187,19 @@ function do_tests(port) {
 function server_request(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	switch(req.url) {
-		case '/outer':
+		case '/access-token':
 			res.statusCode = 200;
 			res.write(JSON.stringify({
 				access_token: '_test_invalid_test_'
 			}));
 			break;
-		case '/inner':
+		case '/profile':
 			res.statusCode = 200;
 			res.write(JSON.stringify({
 				invalid: '_test_invalid_test_'
 			}));
 			break;
-		case '/access-token':
+		case '/missing-access-token':
 			res.statusCode = 200;
 			res.write(JSON.stringify({
 			}));

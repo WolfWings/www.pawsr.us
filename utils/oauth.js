@@ -45,7 +45,7 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 			throw Error('OAuth Code missing!');
 		}
 	} catch (err) {
-		console.log(serviceTitle + ': ' + err.message);
+		console.log('oauth2_login(' + serviceTitle + ') - Error: ' + err.message);
 
 		delete(data.session[service + '_uuid']);
 
@@ -96,12 +96,14 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 		});
 		response.on('end', () => {
 			if (response.statusCode !== 200) {
+				console.log('oauth2_login(' + serviceTitle + ') Error - Access_token status code: ' + response.statusCode);
 				keyvalue.set(uuid, 'error:' + response.statusCode);
 				return;
 			}
 
 			var results = JSON.parse(buffer.toString('utf8'));
 			if (typeof results.access_token === 'undefined') {
+				console.log('oauth2_login(' + serviceTitle + ') Error - No access_token returned');
 				keyvalue.set(uuid, 'error:No access_token returned');
 				return;
 			}
@@ -123,6 +125,7 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 				});
 				response.on('end', () => {
 					if (response.statusCode !== 200) {
+						console.log('oauth2_login(' + serviceTitle + ') Error - Profile status code: ' + response.statusCode);
 						keyvalue.set(uuid, 'error:' + response.statusCode);
 						return;
 					}
@@ -133,15 +136,15 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 				});
 			});
 			request.on('error', (e) => {
+				console.log('oauth2_login(' + serviceTitle + ') Error - Problem with profile request: ' + e.message);
 				keyvalue.set(uuid, 'error:' + serviceTitle + ' API request failure.');
-				console.log(`Problem with request: ${e.message}`);
 			});
 			request.end();
 		});
 	});
 	request.on('error', (e) => {
+		console.log('oauth2_login(' + serviceTitle + ') Error - Problem with access_token request: ' + e.message);
 		keyvalue.set(uuid, 'error:' + serviceTitle + ' API request failure.');
-		console.log(`Problem with request: ${e.message}`);
 	});
 	request.write(params);
 	request.end();
