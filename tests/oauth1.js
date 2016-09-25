@@ -141,25 +141,7 @@ function server_request(req, res) {
 	res.end();
 }
 
-// Self-signed 256-bit ECDSA w/ SHA256 key for 'localhost'
-var server = https.createServer({
-	key:	    '-----BEGIN PRIVATE KEY-----'
-		+ '\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgf3vmP0wAu2UEsKtf'
-		+ '\nLVhyqqkMViuVbTovRIYNQRbzaOWhRANCAAQjSGLck0W9ZukG0VdfcsJTVj4CtMzG'
-		+ '\ni7+BlPamfwsnKcXZQo9qhc28g2QibWzcge2I1DY4PR++Npxpm7NGnsa1'
-		+ '\n-----END PRIVATE KEY-----'
-,	cert:	    '-----BEGIN CERTIFICATE-----'
-		+ '\nMIIBfTCCASKgAwIBAgIJAJ9ceaj5u+2GMAoGCCqGSM49BAMCMBQxEjAQBgNVBAMM'
-		+ '\nCWxvY2FsaG9zdDAeFw0xNjA5MjQxNjA2MTVaFw0xOTA2MjExNjA2MTVaMBQxEjAQ'
-		+ '\nBgNVBAMMCWxvY2FsaG9zdDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABCNIYtyT'
-		+ '\nRb1m6QbRV19ywlNWPgK0zMaLv4GU9qZ/CycpxdlCj2qFzbyDZCJtbNyB7YjUNjg9'
-		+ '\nH742nGmbs0aexrWjXTBbMB0GA1UdDgQWBBRDiu/DLRB92tR9ScBwXSeuBSnFeTAf'
-		+ '\nBgNVHSMEGDAWgBRDiu/DLRB92tR9ScBwXSeuBSnFeTAMBgNVHRMEBTADAQH/MAsG'
-		+ '\nA1UdDwQEAwIFoDAKBggqhkjOPQQDAgNJADBGAiEAk5KJ7XYLm0+gVAvrutGF9svt'
-		+ '\noTyqrmAPSo7YAgKhhQ0CIQDqK/ThfBFfQWbITS9pU4HAJCjwfe1QSqVI5aqPl4DK'
-		+ '\n4Q=='
-		+ '\n-----END CERTIFICATE-----'
-});
+var server = https.createServer(require('../utils/localhost_ssl_keys.js'));
 
 server.on('clientError', (err, socket) => {
 	socket.end();
