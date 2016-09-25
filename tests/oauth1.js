@@ -227,14 +227,13 @@ server.on('clientError', (err, socket) => {
 server.on('request', server_request);
 server.on('listening', () => {
 	const port = server.address().port;
-	console.log('Server listening on port ' + port);
+	console.log('OAuth 1.0a testing server on port ' + port);
 
 	do_tests(port);
 
-	console.log('Waiting two seconds for testing to complete before shutting down HTTPS localhost server');
 	setTimeout(() => {
-		console.log('Testing complete.');
 		server.close();
+		console.log('OAuth 1.0a testing server shut down');
 	}, 2000);
 });
 server.listen(0);

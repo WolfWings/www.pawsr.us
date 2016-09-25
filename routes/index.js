@@ -2,9 +2,6 @@ const fs = require('fs');
 const path = require('path');
 
 // Shared 'global' data for all routes/endpoints
-//
-// While generally frowned upon, this is the cleanest way to allow segmented
-// addition of additional services supported, and other modular additions.
 var shared_data = {
 	services: []
 };

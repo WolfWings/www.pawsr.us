@@ -13,7 +13,7 @@
 // This structure works for now, but we need a better
 // implementation to avoid this file exploding in size
 //
-// Longer-term we may need to change the setup to handle
+// Longer-term we need to change the setup to handle
 // to/from matching instead of missing-tag matching.
 const schema_updates = {
 	'0.0.0': [

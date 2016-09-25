@@ -2,35 +2,21 @@ const http = require('http');
 const crypto = require('crypto');
 const JSON_utils = require('./utils/JSON.js');
 
-// Load the routes details
+// Load the routes
 var routes = require('./routes');
 const shared_data = routes.shared_data;
 const endpoints = routes.endpoints;
 delete routes;
 
+//
 // Build the database connection at the central level
+//
 global.database = require('./utils/database.js');
 
 //
 // Build the HTTP listener server
 //
-
-// Default action is to just close the socket as a failsafe
-var server = http.createServer((req, res) => {
-	res.end;
-});
-
-// Send a proper 400 if the client is sending screwy requests
-server.on('clientError', (err, socket) => {
-	socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-});
-
-// Actual request handler here
-//
-// Parse the URI to split out the query, DRY concept in action
-//
-// Also parse out the 'cookies' from the headers
-server.on('request', (raw, res) => {
+var server = http.createServer((raw, res) => {
 	const url = require('url');
 	const aead = require('./utils/aead.js');
 	const querystring = require('querystring');
@@ -41,7 +27,7 @@ server.on('request', (raw, res) => {
 	var route = endpoints.find(i => i.uri === uri);
 	var tempdata;
 
-	// Early bail-out of invalid routes to avoid session decoding when possible
+	// Early bail-out of invalid routes to avoid session decoding entirely
 	if (typeof(route) === 'undefined') {
 		console.log('Unknown URI: ' + uri);
 		res.statusCode = 404;
@@ -67,16 +53,16 @@ server.on('request', (raw, res) => {
 	});
 
 	// Now we process the session cookie if needed, using AEAD
-	// Note the 9-character padding is due to the base64base64
+	// Note the 12-character padding is due to the dual-base64
 	// effective encoding. It adds 16 characters to both ends.
+	// It is not verified or generated in any way, it's purely
+	// there to provide a minimal encrypted payload length and
+	// remove the known-plaintext outermost {} curly braces.
 	var session = {};
 	if (typeof cookies['session'] !== 'undefined') {
 		try {
 			var decoded = '{' + aead.decrypt(cookies['session'], server_key).slice(12, -12) + '}';
 			session = JSON.parse(decoded, JSON_utils.JSONreviver);
-			if (typeof session.userid === 'string') {
-				session.userid = parseInt(session.userid);
-			}
 		} catch (e) {
 			console.log(e);
 			console.log(cookies.session);
@@ -86,10 +72,9 @@ server.on('request', (raw, res) => {
 	}
 
 	// Utility function in case we need to nuke the session, mostly just for logout
-	// Centralized here to guarantee we only use one minimal and valid session value
-	// And yes, this key is valid. :)
+	// Centralized here to guarantee we only use one 'dead' session key
 	res.deleteSession = () => {
-		res.setHeader('Set-Cookie', 'session=..wolf.TVk2UngFOJyCqvu3gVt8Ag; HttpOnly; Secure; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+		res.setHeader('Set-Cookie', 'session=...; HttpOnly; Secure; Path=/; Domain=.pawsr.us; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
 	}
 
 	// Utility DRY function for storing an updated session-state
@@ -116,9 +101,6 @@ server.on('request', (raw, res) => {
 		}
 	}
 
-	// Provide access to the database
-	// res.database = database;
-
 	console.time(uri);
 	tempdata = JSON.parse(shared_data);
 	tempdata.query = parsedurl.query;
@@ -131,5 +113,10 @@ server.on('request', (raw, res) => {
 	console.timeEnd(uri);
 });
 
-// Finally select a listening port
+// Send a proper 400 if the client is sending screwy requests
+server.on('clientError', (err, socket) => {
+	socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+});
+
+// Open up a listening port
 server.listen(8000);
