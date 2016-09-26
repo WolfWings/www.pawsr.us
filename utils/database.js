@@ -105,6 +105,38 @@ const schema_updates = {
 	 +	' SET title="Amazon", url_format=NULL, class="amazon", login="yes", internaldisplay=""'
 	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.1.amazon"'
 	]
+,	'0.1.instagram': [
+		'INSERT INTO versioning'
+	 +	' SET record = "0.1.instagram", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'INSERT INTO services'
+	 +	' SET title="Instagram", url_format="https:\x2F/www.instagram.com/%s", class="instagram", login="yes", internaldisplay=""'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.1.instagram"'
+	]
+,	'0.2.0': [
+		'INSERT INTO versioning'
+	 +	' SET record = "0.2.0", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'ALTER TABLE service_info'
+	 +	' DROP FOREIGN KEY `service_info_ibfk_1`'
+	,	'ALTER TABLE service_info'
+	 +	' MODIFY COLUMN _services BIGINT UNSIGNED NOT NULL'
+	,	'ALTER TABLE service_info'
+	 +	' ADD FOREIGN KEY `_services`'
+	 +	' (`_services`) REFERENCES'
+	 +	' `services` (`_services`)'
+	 +	' ON DELETE CASCADE'
+	 +	' ON UPDATE CASCADE'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.2.0"'
+	]
+,	'0.2.battlenetus': [
+		'INSERT INTO versioning'
+	 +	' SET record = "0.2.battlenetus", complete = ""'
+	 +	' ON DUPLICATE KEY UPDATE complete = ""'
+	,	'INSERT INTO services'
+	 +	' SET title="BattleNetUS", url_format="https:\x2F/display-contact.pawsr.us/battlenet-us/%s", class="battlenet", login="yes", internaldisplay="yes"'
+	,	'UPDATE versioning SET complete = "yes" WHERE record = "0.2.battlenetus"'
+	]
 };
 
 // This function sends all updates required to the database

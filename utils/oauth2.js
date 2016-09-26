@@ -4,6 +4,26 @@ const _url = require('url');
 const keyvalue = require('./keyvalue.js');
 const nonce = require('./nonce.js');
 
+function get_property(object, property) {
+	var parts = property.split('.');
+	var tunnel = object;
+
+	// Dig down until we run out of steps, or out of nesting
+	while ((parts.length > 0)
+	    && (typeof tunnel[parts[0]] !== 'undefined')) {
+		tunnel = tunnel[parts[0]];
+		parts.shift();
+	}
+
+	// If there's any parts left we ran out of nesting
+	if (parts.length > 0) {
+		return undefined;
+	}
+
+	// Even if the last step is missing, we'll return undefined
+	return tunnel;
+}
+
 exports.oauth2_initlogin = (data, res, service, clientID, loginURL, scope) => {
 	var uuid = nonce();
 	data.session[service + '_uuid'] = uuid;
@@ -94,7 +114,11 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 				return;
 			}
 
-			url = _url.parse(u_p_url, false, true);
+			url = _url.parse(u_p_url + '?' + querystring.stringify({
+				access_token:	results.access_token
+//			,	client_id:	secrets.clientID
+//			,	client_secret:	secrets.clientSecret
+			}), false, true);
 			url.method = 'GET';
 			url.agent = false;
 			url.headers = {
@@ -112,13 +136,20 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 				response.on('end', () => {
 					if (response.statusCode !== 200) {
 						console.log('oauth2_login(' + serviceTitle + ') Error - Profile status code: ' + response.statusCode);
+						console.log(buffer.toString('utf8'));
 						keyvalue.set(uuid, 'error:' + response.statusCode);
 						return;
 					}
 
 					var results = JSON.parse(buffer.toString('utf8'));
 
-					require('../utils/login_complete.js')(data.session.userid, serviceTitle, uuid, results[u_p_id], results[u_p_name]);
+					require('../utils/login_complete.js')(
+						data.session.userid
+					,	serviceTitle
+					,	uuid
+					,	get_property(results, u_p_id)
+					,	get_property(results, u_p_name)
+					);
 				});
 			});
 			request.on('error', (e) => {

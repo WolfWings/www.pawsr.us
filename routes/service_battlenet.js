@@ -1,4 +1,4 @@
-const serviceTitle = 'Instagram';
+const serviceTitle = 'BattleNetUS';
 const service = serviceTitle.toLowerCase();
 
 const secrets = require('../secrets.js').services[service];
@@ -10,7 +10,7 @@ module.exports = (endpoints, shared_data) => {
 	shared_data.services.push({
 		name:		serviceTitle
 	,	login_url:	'/initlogin/' + service
-	,	logout_url:	'https:\x2F/www.instagram.com/accounts/logout/'
+	,	logout_url:	'about:blank'
 	});
 
 	endpoints.push({
@@ -21,8 +21,8 @@ module.exports = (endpoints, shared_data) => {
 			,	res
 			,	service
 			,	secrets.clientID
-			,	'https:\x2F/api.instagram.com/oauth/authorize'
-			,	'basic'
+			,	'https:\x2F/us.battle.net/oauth/authorize'
+			,	''
 			);
 		}
 	});
@@ -35,11 +35,11 @@ module.exports = (endpoints, shared_data) => {
 			,	res
 			,	serviceTitle
 			,	secrets
-			,	'https:\x2F/api.instagram.com/oauth/access_token'
-			,	null
-			,	'https:\x2F/api.instagram.com/v1/users/self/'
-			,	'data.id'
-			,	'data.username'
+			,	'https:\x2F/us.battle.net/oauth/token'
+			,	secrets
+			,	'https:\x2F/us.api.battle.net/account/user'
+			,	'id'
+			,	'battletag'
 			);
 		}
 	});

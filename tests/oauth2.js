@@ -70,7 +70,7 @@ function do_tests(port) {
 	,	fake_secrets
 	,	localhost + 'profile'
 	,	'invalid'
-	,	'invalid'
+	,	'invalid.invalid'
 	);
 
 	console.log('Testing OAuth2 CSRF check');
@@ -197,30 +197,30 @@ function do_tests(port) {
 }
 
 function server_request(req, res) {
+	console.log(req.url);
 	res.setHeader('Content-Type', 'application/json');
-	switch(req.url) {
-		case '/access-token':
+	switch(true) {
+		case /^.access-token/.test(req.url):
 			res.statusCode = 200;
 			res.write(JSON.stringify({
 				access_token: '_test_invalid_test_'
 			}));
 			break;
-		case '/profile':
+		case /^.profile/.test(req.url):
 			res.statusCode = 200;
 			res.write(JSON.stringify({
 				invalid: '_test_invalid_test_'
 			}));
 			break;
-		case '/missing-access-token':
+		case /^.missing-access-token/.test(req.url):
 			res.statusCode = 200;
 			res.write(JSON.stringify({
 			}));
 			break;
-		case '/status-code':
+		case /^.status-code/.test(req.url):
 			res.statusCode = 403;
 			break;
 		default:
-			console.log(req.url);
 	}
 	res.end();
 }
