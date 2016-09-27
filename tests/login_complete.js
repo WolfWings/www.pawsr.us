@@ -50,45 +50,45 @@ function do_tests(step) {
 	var uuid = step.toString(10);
 	switch (step) {
 		case 0:
-			console.log('Creating user #0...');
-			keyvalue.set(uuid, 'wip');
-			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
+			console.log('Invalid user...');
+			login_complete(undefined, undefined, uuid, undefined, undefined);
+			keyvalue.set(uuid, 'ready:-1');
 			waitHelper(uuid, step + 1);
 			break;
 		case 1:
-			console.log('Creating user #1...');
-			keyvalue.set(uuid, 'wip');
-			login_complete(undefined, 'Twitter', uuid, '_test_1_test_', 'TestAccount' + step);
-			waitHelper(uuid, step + 1);
-			break;
-		case 2:
-			console.log('Triggering merge of user #1 into user #0...');
-			keyvalue.set(uuid, 'wip');
-			login_complete(users['0'], 'Twitter', uuid, '_test_1_test_', 'TestAccount' + step);
-			waitHelper(uuid, step + 1);
-			break;
-		case 3:
-			console.log('Creating user #2 while logged into user #0...');
-			keyvalue.set(uuid, 'wip');
-			login_complete(users['0'], 'Twitter', uuid, '_test_2_test_', 'TestAccount' + step);
-			waitHelper(uuid, step + 1);
-			break;
-		case 4:
-			console.log('Finding user #0...');
-			keyvalue.set(uuid, 'wip');
-			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
-			waitHelper(uuid, step + 1);
-			break;
-		case 5:
 			console.log('Invalid ID...');
 			login_complete(undefined, undefined, uuid, '_test_3_test_', undefined);
 			keyvalue.set(uuid, 'ready:-1');
 			waitHelper(uuid, step + 1);
 			break;
+		case 2:
+			console.log('Creating record...');
+			keyvalue.set(uuid, 'wip');
+			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
+			waitHelper(uuid, step + 1);
+			break;
+		case 3:
+			console.log('Finding record just made...');
+			keyvalue.set(uuid, 'wip');
+			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', 'TestAccount' + step);
+			waitHelper(uuid, step + 1);
+			break;
+		case 4:
+			console.log('Creating record tied to previous record...');
+			keyvalue.set(uuid, 'wip');
+			login_complete(users['2'], 'Twitter', uuid, '_test_1_test_', 'TestAccount' + step);
+			waitHelper(uuid, step + 1);
+			break;
+		case 5:
+			console.log('Creating record...');
+			keyvalue.set(uuid, 'wip');
+			login_complete(undefined, 'Twitter', uuid, '_test_2_test_', 'TestAccount' + step);
+			waitHelper(uuid, step + 1);
+			break;
 		case 6:
-			console.log('Invalid user...');
-			login_complete(undefined, undefined, uuid, undefined, undefined);
-			keyvalue.set(uuid, 'ready:-1');
+			console.log('Triggering merge to previous record...');
+			keyvalue.set(uuid, 'wip');
+			login_complete(users['2'], 'Twitter', uuid, '_test_2_test_', 'TestAccount' + step);
 			waitHelper(uuid, step + 1);
 			break;
 
