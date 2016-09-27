@@ -23,7 +23,7 @@ function create_watch() {
 
 function update_file() {
 	delete_watch();
-	fs.writeFileSync('./keyvalue', JSON.stringify(Array.from(global.keyvalue.entries())));
+	fs.writeFileSync('./keyvalue', JSON.stringify([...global.keyvalue]));
 	create_watch();
 }
 
