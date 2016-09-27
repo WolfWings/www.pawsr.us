@@ -1,10 +1,10 @@
-module.exports = (endpoints, shared_data) => {
-	const fs = require('fs');
-	const loggedout_html = fs.readFileSync('./static/homepage/loggedout.html').toString('utf8');
-	const loggedin_html = fs.readFileSync('./static/homepage/loggedin.html').toString('utf8');
-	const loggedout_css = fs.readFileSync('./static/homepage/loggedout.css').toString('utf8');
-	const loggedin_css = fs.readFileSync('./static/homepage/loggedin.css').toString('utf8');
+const fs = require('fs');
+const loggedout_html = fs.readFileSync('./static/homepage/loggedout.html').toString('utf8');
+const loggedin_html = fs.readFileSync('./static/homepage/loggedin.html').toString('utf8');
+const loggedout_css = fs.readFileSync('./static/homepage/loggedout.css').toString('utf8');
+const loggedin_css = fs.readFileSync('./static/homepage/loggedin.css').toString('utf8');
 
+module.exports = (endpoints, shared_data) => {
 	console.log('Registering /');
 	endpoints.push({
 		uri: '/'

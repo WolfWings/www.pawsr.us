@@ -143,7 +143,6 @@ const schema_updates = {
 // The 'setImmediate' tail-recusion avoids using up the stack
 // entirely, as there's no actual loopback calls at all.
 var send_updates = (conn, records, index) => {
-	console.log('send_updates');
 	if (records.length < 1) {
 		console.log('Finished updating database schema.');
 		conn.release();

@@ -1,7 +1,9 @@
 const fs = require('fs');
+const ico = fs.readFileSync('./static/favicon/favicon.ico');
+const png = fs.readFileSync('./static/favicon/favicon.png');
+const apple = fs.readFileSync('./static/favicon/apple.png');
 
 module.exports = (endpoints, shared_data) => {
-	const ico = fs.readFileSync('./static/favicon/favicon.ico');
 	console.log('Registering /favicon.ico');
 	endpoints.push({
 		uri: '/favicon.ico'
@@ -21,7 +23,6 @@ res.end();
 		}
 	});
 
-	const png = fs.readFileSync('./static/favicon/favicon.png');
 	console.log('Registering /favicon.png');
 	endpoints.push({
 		uri: '/favicon.png'
@@ -41,7 +42,6 @@ res.end();
 		}
 	});
 
-	const apple = fs.readFileSync('./static/favicon/apple.png');
 	console.log('Registering /apple-touch-icon.png');
 	endpoints.push({
 		uri: '/apple-touch-icon.png'
