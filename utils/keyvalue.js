@@ -1,52 +1,54 @@
 // Minimalistic filesystem-based key-value store
 // Longer-term migrating this to memcache would improve matters greatly
-// However 'sync' network I/O on node is nigh-impossible
+// However 'sync' network I/O on node is nigh-impossible until await
 // And the callback-hell that results would drive me to just write this
 // entire application in NASM first.
 
 const fs = require('fs');
 const crypto = require('crypto');
 
-// A terse wrapper function to ignore 'EEXIST' errors on the fs.mydirSync call
-function mkdirSafe(dir) {
-	try {
-		fs.mkdirSync(dir);
-	} catch (err) {
-		if (err.code !== 'EEXIST') {
-			throw err;
-		}
+function delete_watch() {
+	if (typeof global.keyvalue_watcher !== 'undefined') {
+		var temp = global.keyvalue_watcher;
+		delete global.keyvalue_watcher;
+		temp.close();
 	}
 }
 
-// Requires a './keyvalue/[0-9a-f]/[0-9a-f]/ directory structure to exist
-// This is a very minimalistic approach, just blindly create the entire tree.
-
-console.log('Creating key-value storage');
-mkdirSafe('./keyvalue');
-'0123456789abcdef'.split('').forEach((first) => {
-	mkdirSafe('./keyvalue/' + first);
-	'0123456789abcdef'.split('').forEach((second) => {
-		mkdirSafe('./keyvalue/' + first + '/' + second);
+function create_watch() {
+	global.keyvalue_watcher = fs.watch('./keyvalue', {persistent: false}, () => {
+		global.keyvalue = new Map(JSON.parse(fs.readFileSync('./keyvalue')));
 	});
-});
+}
 
-var purged = false;
+function update_file() {
+	delete_watch();
+	fs.writeFileSync('./keyvalue', JSON.stringify(Array.from(global.keyvalue.entries())));
+	create_watch();
+}
+
+// Register the global keyvalue Map
+if (typeof global.keyvalue === 'undefined') {
+	try {
+		console.log('Loading key-value storage');
+		global.keyvalue = new Map(JSON.parse(fs.readFileSync('./keyvalue')));
+		create_watch();
+	} catch (e) {
+		console.log('Error: Creating blank key-value storage');
+		global.keyvalue = new Map();
+		update_file();
+	}
+}
+
+// istanbul ignore next: Code coverage can't detect 'on exit' functions
 function exitHandler(options, err) {
-	if (purged === false) {
-		purged = true;
-		if (err) console.log(err.stack);
-		console.log('Purging key-value storage');
-		'0123456789abcdef'.split('').forEach((first) => {
-			'0123456789abcdef'.split('').forEach((second) => {
-				fs.readdirSync('./keyvalue/' + first + '/' + second + '/').forEach((file) => {
-					fs.unlinkSync('./keyvalue/' + first + '/' + second + '/' + file);
-				});
-				fs.rmdirSync('./keyvalue/' + first + '/' + second);
-			});
-			fs.rmdirSync('./keyvalue/' + first);
-		});
-		fs.rmdirSync('./keyvalue');
-		if (options.exit) process.exit();
+	if (typeof global.keyvalue !== 'undefined') {
+		console.log('Disconnecting global keyvalue store on exit');
+		delete global.keyvalue;
+		delete_watch();
+	}
+	if (options.exit) {
+		process.exit();
 	}
 }
 
@@ -65,32 +67,19 @@ function safeKey(key) {
 };
 
 exports.set = (key, value) => {
-	var trueKey = safeKey(key);
-	// Unsafe to use fs.writeFile without waiting for the callback
-	// So we're stuck with the sync version for this use-case
-	try {
-		fs.writeFileSync('./keyvalue/' + trueKey, value);
-	} catch (err) {
-		return;
-	}
+	global.keyvalue.set(key, value);
+	update_file();
 };
 
 exports.get = (key) => {
-	var value = null;
-	var trueKey = safeKey(key);
-	try {
-		value = fs.readFileSync('./keyvalue/' + trueKey).toString('utf8');
-	} catch (err) {
+	var value = global.keyvalue.get(key);
+	if (typeof value === 'undefined') {
 		value = null;
 	}
 	return value;
 }
 
 exports.delete = (key) => {
-	var trueKey = safeKey(key);
-	try {
-		fs.unlinkSync('./keyvalue/' + trueKey);
-	} catch (err) {
-		return;
-	};
+	global.keyvalue.delete(key);
+	update_file();
 }
