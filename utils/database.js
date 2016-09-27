@@ -139,91 +139,81 @@ const schema_updates = {
 	]
 };
 
+// Build the connection pool itself
+var database = require('mysql').createPool(require('../secrets.js').database);
+
 // This function sends all updates required to the database
 // The 'setImmediate' tail-recusion avoids using up the stack
 // entirely, as there's no actual loopback calls at all.
-var send_updates = (conn, records, index) => {
+var send_updates = (records, index) => {
 	if (records.length < 1) {
 		console.log('Finished updating database schema.');
-		conn.release();
-		delete conn;
 		return;
 	}
 
 	if (index >= schema_updates[records[0]].length) {
-		send_updates(conn, records.slice(1), 0);
+		send_updates(records.slice(1), 0);
 		return;
 	}
 
 	console.log('Processing schema update ' + records[0] + ', step ' + (index + 1) + ' of ' + schema_updates[records[0]].length);
-	var query = conn.query(schema_updates[records[0]][index]);
+	var query = database.query(schema_updates[records[0]][index]);
 	query.on('error', (err) => { throw err; });
 	query.on('fields', (_) => { return; });
 	query.on('result', (_) => { return; });
 	query.on('end', (_) => {
-		setImmediate(send_updates, conn, records, index + 1);
+		setImmediate(send_updates, records, index + 1);
 	});
 };
 
-// Build the connection pool itself
-var database = require('mysql').createPool(require('../secrets.js').database);
-
-console.log('Connecting to database.');
-
 // Verify database format/version
-database.getConnection((err, conn) => {
-	console.log('Verifying database has any tables in it.');
+console.log('Verifying database has any tables in it.');
 
+database.query('SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = DATABASE()', (err, rows, fields) => {
 	if (err) {
 		throw err;
 	}
 
-	conn.query('SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = DATABASE()', (err, rows, fields) => {
+	// Database doesn't exist, create whole cloth
+	// This is a special-case short-circuit to just send the ENTIRE
+	// database schema update list upstream to build from scratch.
+	if (rows[0].count === 0) {
+		send_updates(Object.keys(schema_updates), 0);
+		return;
+	}
+
+	console.log('Checking for incomplete schema updates.');
+
+	database.query('SELECT record FROM versioning WHERE complete != "yes"', (err, rows, fields) => {
 		if (err) {
 			throw err;
 		}
 
-		// Database doesn't exist, create whole cloth
-		// This is a special-case short-circuit to just send the ENTIRE
-		// database schema update list upstream to build from scratch.
-		if (rows[0].count === 0) {
-			send_updates(conn, Object.keys(schema_updates), 0);
-			return;
+		if (rows.length > 0) {
+			for (var i = 0; i < rows.length; i++) {
+				console.log('Incomplete database update: ' + rows[i].record);
+			}
+
+			throw Error('Database in inconsistent state! Incomplete schema update recorded.');
 		}
 
-		console.log('Checking for incomplete schema updates.');
+		console.log('Checking for completed schema updates.');
 
-		conn.query('SELECT record FROM versioning WHERE complete != "yes"', (err, rows, fields) => {
+		database.query('SELECT record FROM versioning WHERE complete = "yes"', (err, rows, fields) => {
+			var processed = [];
 			if (err) {
 				throw err;
 			}
 
 			if (rows.length > 0) {
 				for (var i = 0; i < rows.length; i++) {
-					console.log('Incomplete database update: ' + rows[i].record);
+					processed.push(rows[i].record);
 				}
-
-				throw Error('Database in inconsistent state! Incomplete schema update recorded.');
 			}
 
-			console.log('Checking for completed schema updates.');
+			console.log('Updating schema...');
 
-			conn.query('SELECT record FROM versioning WHERE complete = "yes"', (err, rows, fields) => {
-				var processed = [];
-				if (err) {
-					throw err;
-				}
-
-				if (rows.length > 0) {
-					for (var i = 0; i < rows.length; i++) {
-						processed.push(rows[i].record);
-					}
-				}
-
-				console.log('Updating schema...');
-
-				setImmediate(send_updates, conn, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
-			});
+			setImmediate(send_updates, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
 		});
 	});
 });
