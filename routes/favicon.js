@@ -4,7 +4,7 @@ const png = fs.readFileSync('./static/favicon/favicon.png');
 const apple = fs.readFileSync('./static/favicon/apple.png');
 
 module.exports = (endpoints, shared_data) => {
-	console.log('Registering /favicon.ico');
+	console.log('Registering various favicon formats');
 	endpoints.push({
 		uri: '/favicon.ico'
 	,	routine: (data, res) => {
@@ -23,7 +23,6 @@ res.end();
 		}
 	});
 
-	console.log('Registering /favicon.png');
 	endpoints.push({
 		uri: '/favicon.png'
 	,	routine: (data, res) => {
@@ -42,7 +41,6 @@ res.end();
 		}
 	});
 
-	console.log('Registering /apple-touch-icon.png');
 	endpoints.push({
 		uri: '/apple-touch-icon.png'
 	,	routine: (data, res) => {
