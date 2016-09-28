@@ -2,3 +2,4 @@ secrets.js
 keyvalue
 coverage/
 node_modules/
+tests/disabled

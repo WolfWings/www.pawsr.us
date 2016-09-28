@@ -18,8 +18,8 @@ const fake_res = {
 };
 
 const fake_secrets = {
-	clientID: '_test_invalid_test_'
-,	clientSecret: '_test_invalid_test_'
+	clientID: '_test_invalid_id_test_'
+,	clientSecret: '_test_invalid_secret_test_'
 };
 
 const base_data = JSON.stringify({

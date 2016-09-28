@@ -21,148 +21,28 @@ const keyvalue = require('../utils/keyvalue.js');
 // Return user_id
 
 module.exports = (user_id, service, uuid, unique_id, screen_name) => {
-	function database_error() {
-		console.log('Database error!');
-		keyvalue.set(uuid, 'error:Database error!');
-	}
+	function insert_update_service_info_record() {
+		console.log('Updating service info record');
+		console.log('\x1b[1;31m' + [service, user_id, unique_id, screen_name] + '\x1b[0m');
 
-	function create_service_info_record() {
-		global.database.query(
+		return global.database.query(
 			'INSERT INTO service_info SET'
 		 +	' _services=(SELECT _services FROM services WHERE title = ?)'
 		 +	',_users = ?'
 		 +	',identifier = ?'
 		 +	',screen_name = ?'
+		 +	' ON DUPLICATE KEY UPDATE'
+		 +	' screen_name = VALUES(screen_name)'
 		,	[	service
 			,	user_id
 			,	unique_id
 			,	screen_name
 			]
-		,	(err, result) => {
-			if (err) {
-				database_error();
-				return;
-			}
-
+		).then(() => {
 			keyvalue.set(uuid, 'ready:' + user_id);
+			return undefined;
 		});
-	}
 
-	function create_user_id() {
-		global.database.query(
-			'INSERT INTO users'
-		 +	' VALUES ()'
-		,	(err, result) => {
-			if (err) {
-				database_error();
-				return;
-			}
-
-			user_id = result.insertId;
-
-			create_service_info_record();
-		});
-	}
-
-	function service_info_not_found() {
-		if (typeof user_id === 'undefined') {
-			create_user_id();
-		} else {
-			create_service_info_record();
-		}
-	}
-
-	function update_service_info() {
-		global.database.query(
-			'UPDATE service_info SET'
-		 +	' screen_name = ?'
-		 +	' WHERE identifier = ?'
-		 +	' AND _users = ?'
-		 +	' AND _services = (SELECT _services FROM services WHERE title = ?)'
-		,	[	screen_name
-			,	unique_id
-			,	user_id
-			,	service
-			]
-		,	(err, result) => {
-			if (err) {
-				database_error();
-				return;
-			}
-
-			keyvalue.set(uuid, 'ready:' + user_id);
-		});
-	}
-
-	function merge_users(old_user_id) {
-		global.database.getConnection((err, conn) => {
-			if (err) {
-				database_error();
-				conn.release();
-				return;
-			}
-
-			conn.beginTransaction((err) => {
-				if (err) {
-					database_error();
-					conn.release();
-					return;
-				}
-
-				conn.query(
-					'UPDATE service_info SET'
-				 +	' _users = ?'
-				 +	' WHERE _users = ?'
-				,	[	user_id
-					,	old_user_id
-					]
-				,	(err, result) => {
-					if (err) {
-						database_error();
-						conn.release();
-						return;
-					}
-
-					conn.query(
-						'UPDATE contact_pages SET'
-					 +	' _users = ?'
-					 +	' WHERE _users = ?'
-					,	[	user_id
-						,	old_user_id
-						]
-					,	(err, result) => {
-						if (err) {
-							database_error();
-							conn.release();
-							return;
-						}
-
-						conn.query(
-							'DELETE FROM users'
-						 +	' WHERE _users = ?'
-						,	[	old_user_id
-							]
-						,	(err, result) => {
-							if (err) {
-								database_error();
-								conn.release();
-								return;
-							}
-
-							conn.commit((err) => {
-								if (err) {
-									database_error();
-									conn.release();
-									return;
-								}
-
-								update_service_info();
-							});
-						});
-					});
-				});
-			});
-		});
 	}
 
 	if (typeof unique_id === 'undefined') {
@@ -184,17 +64,26 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 	 +	' USING (_services)'
 	 +	' WHERE services.title = ?'
 	 +	' AND identifier = ?'
-	,	[service, unique_id]
-	,	(err, rows, fields) => {
-		if (err) {
-			database_error();
-			return;
-		}
-
-		if (rows.length === 0) {
+	,	[	service
+		,	unique_id
+		]
+	).then(([rows, fields]) => {
+		if ((rows.length === 0)
+		 || (rows[0]['_users'] === null)) {
 			console.log('Service info not found');
-			service_info_not_found();
-			return;
+			if (typeof user_id === 'undefined') {
+				console.log('Creating new user_id');
+				return global.database.query(
+					'INSERT INTO users'
+				 +	' VALUES ()'
+				).then(([result, _]) => {
+					user_id = result.insertId;
+
+					return insert_update_service_info_record();
+				});
+			} else {
+				return insert_update_service_info_record();
+			}
 		}
 
 		if (typeof user_id === 'undefined') {
@@ -204,11 +93,50 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 
 		if (user_id !== rows[0]['_users']) {
 			console.log('Merging ' + rows[0]['_users'] + ' into ' + user_id);
-			merge_users(rows[0]['_users']);
-			return;
+			// Need to nest here to keep the 'conn' variable available
+			return global.database.getConnection().then(conn => {
+				conn.query('START TRANSACTION')
+				  .then(() => {
+					return conn.query(
+						'UPDATE service_info SET'
+					 +	' _users = ?'
+					 +	' WHERE _users = ?'
+					,	[	user_id
+						,	rows[0]['_users']
+						]
+					);
+				}).then(() => {
+					return conn.query(
+						'UPDATE contact_pages SET'
+					 +	' _users = ?'
+					 +	' WHERE _users = ?'
+					,	[	user_id
+						,	rows[0]['_users']
+						]
+					);
+				}).then(() => {
+					return conn.query(
+						'DELETE FROM users'
+					 +	' WHERE _users = ?'
+					,	[	rows[0]['_users']
+						]
+					);
+				}).then(() => {
+					return conn.query('COMMIT');
+				}).then(() => {
+					conn.release(); // Done with the connection, let it go!
+					return insert_update_service_info_record();
+				}).catch(err => { // Re-reject after closing the connection
+					conn.release();
+					return Promise.reject(err);
+				});
+			});
 		}
 
-		console.log('Updating service info');
-		update_service_info();
+		return insert_update_service_info_record();
+	}).catch(err => {
+		console.log('Database error!');
+		console.log(err);
+		keyvalue.set(uuid, 'error:Database error!');
 	});
 };

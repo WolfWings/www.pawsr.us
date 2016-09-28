@@ -157,11 +157,8 @@ var send_updates = (records, index) => {
 	}
 
 	console.log('Processing schema update ' + records[0] + ', step ' + (index + 1) + ' of ' + schema_updates[records[0]].length);
-	var query = database.query(schema_updates[records[0]][index]);
-	query.on('error', (err) => { throw err; });
-	query.on('fields', (_) => { return; });
-	query.on('result', (_) => { return; });
-	query.on('end', (_) => {
+	database.query(schema_updates[records[0]][index])
+	.then(() => {
 		setImmediate(send_updates, records, index + 1);
 	});
 };
@@ -184,7 +181,7 @@ database.query(
 
 	console.log('Checking for incomplete schema updates.');
 
-	reutrn database.query('SELECT record FROM versioning WHERE complete != "yes"');
+	return database.query('SELECT record FROM versioning WHERE complete != "yes"');
 }).then(([rows, fields]) => {
 	if (rows.length > 0) {
 		for (var i = 0; i < rows.length; i++) {
@@ -196,7 +193,7 @@ database.query(
 
 	console.log('Checking for completed schema updates.');
 
-	reutrn database.query('SELECT record FROM versioning WHERE complete = "yes"');
+	return database.query('SELECT record FROM versioning WHERE complete = "yes"');
 }).then(([rows, fields]) => {
 	var processed = [];
 	if (rows.length > 0) {
