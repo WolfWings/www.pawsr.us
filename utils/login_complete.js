@@ -23,7 +23,6 @@ const keyvalue = require('../utils/keyvalue.js');
 module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 	function insert_update_service_info_record() {
 		console.log('Updating service info record');
-		console.log('\x1b[1;31m' + [service, user_id, unique_id, screen_name] + '\x1b[0m');
 
 		return global.database.query(
 			'INSERT INTO service_info SET'
