@@ -140,7 +140,7 @@ const schema_updates = {
 };
 
 // Build the connection pool itself
-var database = require('mysql2').createPool(require('../secrets.js').database);
+var database = require('mysql2/promise').createPool(require('../secrets.js').database);
 
 // This function sends all updates required to the database
 // The 'setImmediate' tail-recusion avoids using up the stack
@@ -169,11 +169,11 @@ var send_updates = (records, index) => {
 // Verify database format/version
 console.log('Verifying database has any tables in it.');
 
-database.query('SELECT COUNT(*) AS count FROM information_schema.tables WHERE table_schema = DATABASE()', (err, rows, fields) => {
-	if (err) {
-		throw err;
-	}
-
+database.query(
+	'SELECT COUNT(*) AS count'
+ +	' FROM information_schema.tables'
+ +	' WHERE table_schema = DATABASE()')
+.then(([rows, fields]) => {
 	// Database doesn't exist, create whole cloth
 	// This is a special-case short-circuit to just send the ENTIRE
 	// database schema update list upstream to build from scratch.
@@ -184,38 +184,30 @@ database.query('SELECT COUNT(*) AS count FROM information_schema.tables WHERE ta
 
 	console.log('Checking for incomplete schema updates.');
 
-	database.query('SELECT record FROM versioning WHERE complete != "yes"', (err, rows, fields) => {
-		if (err) {
-			throw err;
+	reutrn database.query('SELECT record FROM versioning WHERE complete != "yes"');
+}).then(([rows, fields]) => {
+	if (rows.length > 0) {
+		for (var i = 0; i < rows.length; i++) {
+			console.log('Incomplete database update: ' + rows[i].record);
 		}
 
-		if (rows.length > 0) {
-			for (var i = 0; i < rows.length; i++) {
-				console.log('Incomplete database update: ' + rows[i].record);
-			}
+		throw Error('Database in inconsistent state! Incomplete schema update recorded.');
+	}
 
-			throw Error('Database in inconsistent state! Incomplete schema update recorded.');
+	console.log('Checking for completed schema updates.');
+
+	reutrn database.query('SELECT record FROM versioning WHERE complete = "yes"');
+}).then(([rows, fields]) => {
+	var processed = [];
+	if (rows.length > 0) {
+		for (var i = 0; i < rows.length; i++) {
+			processed.push(rows[i].record);
 		}
+	}
 
-		console.log('Checking for completed schema updates.');
+	console.log('Updating schema...');
 
-		database.query('SELECT record FROM versioning WHERE complete = "yes"', (err, rows, fields) => {
-			var processed = [];
-			if (err) {
-				throw err;
-			}
-
-			if (rows.length > 0) {
-				for (var i = 0; i < rows.length; i++) {
-					processed.push(rows[i].record);
-				}
-			}
-
-			console.log('Updating schema...');
-
-			setImmediate(send_updates, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
-		});
-	});
+	setImmediate(send_updates, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
 });
 
 module.exports = database;

@@ -245,7 +245,13 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 
 			var results = querystring.parse(buffer.toString('utf8'));
 
-			require('../utils/login_complete.js')(data.session.userid, serviceTitle, uuid, results[unique_id], results[screen_name]);
+			require('../utils/login_complete.js')(
+				data.session.userid
+			,	serviceTitle
+			,	uuid
+			,	results[unique_id]
+			,	results[screen_name]
+			);
 		});
 	});
 	request.on('error', (e) => {
