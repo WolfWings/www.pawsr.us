@@ -6,24 +6,16 @@ var users = {};
 purge_test_remnants(do_tests, 0);
 
 function purge_test_remnants(finished_func, finished_arg) {
-	global.database.getConnection((err, conn) => {
+	console.log('Purging test remnants...');
+
+	global.database.query('DELETE FROM users WHERE _users IN (SELECT _users FROM service_info WHERE identifier LIKE "_test_%_test_")', (err, results) => {
 		if (err) {
 			throw err;
 		}
 
-		console.log('Purging test remnants...');
+		console.log('Remnants purged.');
 
-		conn.query('DELETE FROM users WHERE _users IN (SELECT _users FROM service_info WHERE identifier LIKE "_test_%_test_")', (err, results) => {
-			if (err) {
-				throw err;
-			}
-
-			conn.release();
-
-			console.log('Remnants purged.');
-
-			finished_func(finished_arg);
-		});
+		finished_func(finished_arg);
 	});
 }
 

@@ -1,9 +1,6 @@
 // Allow this test to be called standalone
 if (typeof global.database === 'undefined') {
-	global.database = {
-		getConnection: () => {
-		}
-	}
+	global.database = {};
 }
 
 const oauth = require('../utils/oauth1.js');
