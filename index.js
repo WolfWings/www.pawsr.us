@@ -41,14 +41,13 @@ var server = http.createServer((raw, res) => {
 	if (raw.headers.hasOwnProperty('cookie')) {
 		rawcookies = ';' + raw.headers.cookie;
 	}
-	rawcookies.split(';').slice(1).forEach((x, i, a) => {
-		var t = x.trim();
-		var j = t.indexOf('=');
+	rawcookies.split(';').slice(1).forEach(cookie => {
+		var i = cookie.indexOf('=');
 		// Naked key handler without an =
-		if (j === -1) {
-			cookies[t] = null;
+		if (i === -1) {
+			cookies[cookie] = null;
 		} else {
-			cookies[t.slice(0, j)] = t.slice(j + 1);
+			cookies[cookie.slice(0, i).trim()] = cookie.slice(i + 1).trim();
 		}
 	});
 

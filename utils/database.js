@@ -148,18 +148,17 @@ var database = require('mysql2/promise').createPool(require('../secrets.js').dat
 var send_updates = (records, index) => {
 	if (records.length < 1) {
 		console.log('Finished updating database schema.');
-		return;
+		return Promise.resolve('Finished updating database schema');
 	}
 
 	if (index >= schema_updates[records[0]].length) {
-		send_updates(records.slice(1), 0);
-		return;
+		return send_updates(records.slice(1), 0);
 	}
 
 	console.log('Processing schema update ' + records[0] + ', step ' + (index + 1) + ' of ' + schema_updates[records[0]].length);
-	database.query(schema_updates[records[0]][index])
+	return database.query(schema_updates[records[0]][index])
 	.then(() => {
-		setImmediate(send_updates, records, index + 1);
+		return send_updates(records, index + 1);
 	});
 };
 
@@ -175,8 +174,10 @@ database.query(
 	// This is a special-case short-circuit to just send the ENTIRE
 	// database schema update list upstream to build from scratch.
 	if (rows[0].count === 0) {
-		send_updates(Object.keys(schema_updates), 0);
-		return;
+		return send_updates(Object.keys(schema_updates), 0)
+		.then(() => {
+			return Promise.reject('Empty database populated.');
+		});
 	}
 
 	console.log('Checking for incomplete schema updates.');
@@ -188,7 +189,7 @@ database.query(
 			console.log('Incomplete database update: ' + incomplete.record);
 		});
 
-		throw Error('Database in inconsistent state! Incomplete schema update recorded.');
+		return Promise.reject(new Error('Database in inconsistent state! Incomplete schema update recorded.'));
 	}
 
 	console.log('Checking for completed schema updates.');
@@ -199,7 +200,13 @@ database.query(
 
 	console.log('Updating schema...');
 
-	setImmediate(send_updates, Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
+	return send_updates(Object.keys(schema_updates).filter(x => (processed.indexOf(x) === -1)), 0);
+}).catch(reason => {
+	if (reason instanceof Error) {
+		throw Error;
+	} else {
+		console.log(reason);
+	}
 });
 
 module.exports = database;
