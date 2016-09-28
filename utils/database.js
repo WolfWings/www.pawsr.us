@@ -186,7 +186,7 @@ database.query(
 	if (rows.length > 0) {
 		[...rows].forEach(incomplete => {
 			console.log('Incomplete database update: ' + incomplete.record);
-		}
+		});
 
 		throw Error('Database in inconsistent state! Incomplete schema update recorded.');
 	}
