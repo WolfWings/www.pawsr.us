@@ -140,7 +140,7 @@ const schema_updates = {
 };
 
 // Build the connection pool itself
-var database = require('mysql').createPool(require('../secrets.js').database);
+var database = require('mysql2').createPool(require('../secrets.js').database);
 
 // This function sends all updates required to the database
 // The 'setImmediate' tail-recusion avoids using up the stack
