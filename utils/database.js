@@ -184,8 +184,8 @@ database.query(
 	return database.query('SELECT record FROM versioning WHERE complete != "yes"');
 }).then(([rows, fields]) => {
 	if (rows.length > 0) {
-		for (var i = 0; i < rows.length; i++) {
-			console.log('Incomplete database update: ' + rows[i].record);
+		[...rows].forEach(incomplete => {
+			console.log('Incomplete database update: ' + incomplete.record);
 		}
 
 		throw Error('Database in inconsistent state! Incomplete schema update recorded.');
@@ -195,12 +195,7 @@ database.query(
 
 	return database.query('SELECT record FROM versioning WHERE complete = "yes"');
 }).then(([rows, fields]) => {
-	var processed = [];
-	if (rows.length > 0) {
-		for (var i = 0; i < rows.length; i++) {
-			processed.push(rows[i].record);
-		}
-	}
+	var processed = [...rows].map(x => x.record);
 
 	console.log('Updating schema...');
 
