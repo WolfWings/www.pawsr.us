@@ -56,16 +56,6 @@ process.on('exit', exitHandler.bind(null, {cleanup: true}));
 process.on('SIGINT', exitHandler.bind(null, {exit: true}));
 process.on('uncaughtException', exitHandler.bind(null, {exit: true}));
 
-// Prevents filesystem-specific filename-based attacks
-function safeKey(key) {
-	var digest;
-	var hash = crypto.createHash('sha256');
-	hash.update(key);
-	digest = hash.digest('hex');
-	digest = digest.slice(0,1) + '/' + digest.slice(1,2) + '/' + digest.slice(2);
-	return digest;
-};
-
 exports.set = (key, value) => {
 	global.keyvalue.set(key, value);
 	update_file();
