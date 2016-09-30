@@ -35,6 +35,20 @@ module.exports = (endpoints, shared_data) => {
 			,	res
 			,	serviceTitle
 			,	'https:\x2F/api.twitter.com/oauth/authenticate'
+			,	false
+			);
+		}
+	});
+
+	endpoints.push({
+		uri: '/ajax/preauth/' + service
+	,	routine: (data, res) => {
+			oauth.oauth1_preauth(
+				data
+			,	res
+			,	serviceTitle
+			,	'https:\x2F/api.twitter.com/oauth/authenticate'
+			,	true
 			);
 		}
 	});

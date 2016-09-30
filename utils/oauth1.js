@@ -85,17 +85,26 @@ exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
 
 };
 
-exports.oauth1_preauth = (data, res, serviceTitle, loginURL) => {
+exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 	var service = serviceTitle.toLowerCase();
 
 	// First make sure the session-state variable exists
 	if (typeof data.session[service + '_uuid'] !== 'string') {
 		console.log('Warning: Damaged UUID for ' + service + ' in session data!');
 
-		res.statusCode = 307;
-		res.saveSession(data.session);
-		res.setHeader('Location', '/initlogin/' + service);
-		res.end();
+		if (ajax === true) {
+			res.saveSession(data.session);
+			res.setHeader('Content-Type', 'application/json');
+			res.write(JSON.stringify({
+				command: 'redirect'
+			,	location: '/initlogin/' + service
+			}));
+		} else {
+			res.statusCode = 307;
+			res.saveSession(data.session);
+			res.setHeader('Location', '/initlogin/' + service);
+			res.end();
+		}
 		return;
 	}
 
@@ -106,24 +115,40 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL) => {
 	// If there is no such UUID on record, boot entirely. Possible replay attack.
 	if (state === null) {
 		console.log('Error: No such UUID for ' + service + ': ' + state);
-
 		delete data.session[service + '_uuid'];
-		res.saveSession(data.session);
-		res.statusCode = 307;
-		res.setHeader('Location', '/');
-		res.end();
+
+		if (ajax === true) {
+			res.saveSession(data.session);
+			res.setHeader('Content-Type', 'application/json');
+			res.write(JSON.stringify({
+				command: 'redirect'
+			,	location: '/'
+			}));
+		} else {
+			res.saveSession(data.session);
+			res.statusCode = 307;
+			res.setHeader('Location', '/');
+			res.end();
+		}
 		return;
 	}
 
 	// If still processing, just cycle around again in one second.
 	// Calls usually take 500ms or less.
 	if (state === 'wip') {
-		res.write(data.boilerplate.pretitle);
-		res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
-		res.write(templating.refresh(1, '/preauth/' + service));
-		res.write(data.boilerplate.prebody);
-		res.write('<p>Requesting unique login token from ' + serviceTitle + '...</p>');
-		res.write(data.boilerplate.postbody);
+		if (ajax === true) {
+			res.saveSession(data.session);
+			res.setHeader('Content-Type', 'application/json');
+			res.write(JSON.stringify({
+				command: 'wait'
+			}));
+		} else {
+			res.write(global.templates.loading({
+				title: serviceTitle + ' Pre-Login Authorizet - www.pawsr.us'
+			,	serviceTitle: serviceTitle
+			,	boilerplate: data.boilerplate
+			}));
+		}
 		return;
 	}
 
@@ -135,16 +160,24 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL) => {
 	if (!state.startsWith('ready:')) {
 		console.log('Finished but not ready: ' + state);
 		delete data.session[service + '_uuid'];
-		res.saveSession(data.session);
-		res.write(data.boilerplate.pretitle);
-		res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
-		res.write(data.boilerplate.prebody);
-		res.write('<p><b>');
-		res.write(state.slice(0,1).toUpperCase());
-		res.write(state.slice(1).replace(/:/g, '! '));
-		res.write('</b></p>');
-		res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
-		res.write(data.boilerplate.postbody);
+		if (ajax === true) {
+			res.saveSession(data.session);
+			res.setHeader('Content-Type', 'application/json');
+			res.write(JSON.stringify({
+				command: 'error'
+			}));
+		} else {
+			res.saveSession(data.session);
+			res.write(data.boilerplate.pretitle);
+			res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
+			res.write(data.boilerplate.prebody);
+			res.write('<p><b>');
+			res.write(state.slice(0,1).toUpperCase());
+			res.write(state.slice(1).replace(/:/g, '! '));
+			res.write('</b></p>');
+			res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
+			res.write(data.boilerplate.postbody);
+		}
 		return;
 	}
 
@@ -153,10 +186,20 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL) => {
 	var components = state.split(':');
 	data.session[service + '_token_secret'] = components[1];
 	data.session[service + '_token'] = components[2];
-	res.saveSession(data.session);
-	res.statusCode = 307;
-	res.setHeader('Location', loginURL + '?oauth_token=' + components[2] + '#');
-	res.end();
+
+	if (ajax === true) {
+		res.saveSession(data.session);
+		res.setHeader('Content-Type', 'application/json');
+		res.write(JSON.stringify({
+			command: 'redirect'
+		,	location: loginURL + '?oauth_token=' + components[2] + '#'
+		}));
+	} else {
+		res.saveSession(data.session);
+		res.statusCode = 307;
+		res.setHeader('Location', loginURL + '?oauth_token=' + components[2] + '#');
+		res.end();
+	}
 };
 
 exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id, screen_name) => {
