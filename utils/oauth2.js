@@ -56,12 +56,11 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 		delete(data.session[service + '_uuid']);
 
 		res.saveSession(data.session);
-		res.write(data.boilerplate.pretitle);
-		res.write('<title>' + serviceTitle + ' Login Callback - www.pawsr.us</title>');
-		res.write(data.boilerplate.prebody);
-		res.write('<p><b>Error:</b> ' + serviceTitle + ' did not successfully login.</p>');
-		res.write('<p><a href=\x22/\x22>Click here to go back to the homepage, and try again later.</a></p>');
-		res.write(data.boilerplate.postbody);
+		res.write(global.templates.login_failure({
+			title: serviceTitle + ' Login Callback - www.pawsr.us'
+		,	mode: 'Error'
+		,	message: serviceTitle + ' did not successfully login.'
+		}));
 		return;
 	}
 
