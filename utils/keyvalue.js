@@ -42,6 +42,10 @@ if (typeof global.keyvalue === 'undefined') {
 
 // istanbul ignore next: Code coverage can't detect 'on exit' functions
 function exitHandler(options, err) {
+	if (err) {
+		console.log(err);
+		console.log(err.stack);
+	}
 	if (typeof global.keyvalue !== 'undefined') {
 		console.log('Disconnecting global keyvalue store on exit');
 		delete global.keyvalue;

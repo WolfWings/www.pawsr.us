@@ -1,0 +1,25 @@
+{{#def.pretitle}}
+<title>{{=it.title}}</title>
+{{? it.refresh }}
+<meta http-equiv="refresh" content="1">
+{{?}}
+{{#def.prebody}}
+<p>Add/Verify Login</p>
+<ul>
+{{~it.services :service}}
+<li><a href="{{=service.login_url}}"
+{{? service.status === 'wip' }}
+ title="Pending..."
+{{?? ('' + service.status).startsWith('error') }}
+ title="Error: {{=service.status.slice(6)}}"
+{{?}}
+>
+{{=service.name}}
+</a>
+{{? service.status }}
+<p><b>Status:</b> {{=service.status}}</p>
+{{?}}
+</li>
+{{~}}
+</ul>
+{{#def.postbody}}

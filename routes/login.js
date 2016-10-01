@@ -9,21 +9,20 @@ module.exports = (endpoints) => {
 
 
 
-var status;
-
 var refresh = false;
 var updatesession = false;
+var services = [];
+
 data.services.forEach((x) => {
 	var service = x.name.toLowerCase();
 
-	status = null;
+	var status = null;
 	if (typeof data.session[service + '_uuid'] !== 'undefined') {
 		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
 
 		if (status === null) {
 			delete data.session[service + '_uuid'];
 			updatesession = true;
-			refresh = true;
 		}
 	}
 
@@ -33,63 +32,28 @@ data.services.forEach((x) => {
 			keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
 			delete data.session[service + '_uuid'];
 			updatesession = true;
+			status = null;
 		} else if (status === 'wip') {
 			refresh = true;
 		}
 	}
+
+	services.push({
+		name: x.name
+	,	status: status === null ? undefined : status
+	,	login_url: x.login_url
+	});
 });
 
 if (updatesession) {
 	res.saveSession(data.session);
 }
 
-res.write(data.boilerplate.pretitle);
-
-res.write('<title>Login - www.pawsr.us</title>');
-
-if (refresh === true) {
-	res.write(templating.refresh(1, '/login'));
-}
-
-res.write(data.boilerplate.prebody);
-
-res.write('<p>Add/Verify Login</p>');
-
-res.write('<ul>');
-
-data.services.forEach((x) => {
-	var service = x.name.toLowerCase();
-
-	status = null;
-
-	if (typeof data.session[service + '_uuid'] !== 'undefined') {
-		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
-	}
-
-	if (status === null) {
-		status = '';
-	}
-
-	res.write('<li><a href=\x22' + x.login_url);
-
-	if (status === 'wip') {
-		res.write(' title=\x22Pending...\x22');
-	} else if (status.startsWith('error:')) {
-		res.write(' title=\x22Error: ' + status.slice(6) + '\x22');
-	}
-
-	res.write('\x22>' + x.name + '</a>');
-
-	if (data.session.hasOwnProperty(service + '_uuid')) {
-		res.write('<br><p><b>Status:</b> ' + status + '</p>');
-	}
-
-	res.write('</li>');
-});
-
-res.write('</ul>');
-
-res.write(data.boilerplate.postbody);
+res.write(global.templates.login({
+	title: 'Login - www.pawsr.us'
+,	refresh: refresh
+,	services: services
+}));
 
 res.end();
 
