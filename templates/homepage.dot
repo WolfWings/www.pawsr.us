@@ -1,0 +1,13 @@
+{{#def.pretitle}}
+<title>{{=it.title}}</title>
+{{#def.prebody}}
+<footer><ul>
+{{? it.userid }}
+<li><a href="/login">Login</a></li>
+<!-- <li><a href="/profile">Profile</a></li> -->
+{{??}}
+<li><a href="/login">Login</a></li>
+<!-- <li><a title="You need to login before you can view your profile!">Profile</a></li> -->
+{{?}}
+</ul></footer>
+{{#def.postbody}}
