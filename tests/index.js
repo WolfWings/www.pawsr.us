@@ -1,3 +1,8 @@
+//
+// Compile any templates
+//
+global.templates = require('dot').process({ path: './templates/' });
+
 global.database = require('../utils/database.js');
 
 const fs = require('fs');

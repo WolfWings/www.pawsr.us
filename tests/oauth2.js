@@ -2,6 +2,12 @@
 if (typeof global.database === 'undefined') {
 	global.database = {};
 }
+if (typeof global.templates === 'undefined') {
+	global.templates = {};
+}
+if (typeof global.templates.login_failure === 'undefined') {
+	global.templates.login_failure = () => {};
+}
 
 const oauth = require('../utils/oauth2.js');
 const https = require('https');

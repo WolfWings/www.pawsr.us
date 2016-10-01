@@ -1,7 +1,6 @@
 const http = require('http');
 const crypto = require('crypto');
 const JSON_utils = require('./utils/JSON.js');
-const dot = require('dot');
 const fs = require('fs');
 
 //
