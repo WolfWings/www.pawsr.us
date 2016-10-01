@@ -1,0 +1,6 @@
+{{#def.pretitle}}
+<title>{{=it.title}}</title>
+{{#def.prebody}}
+<p><b>{{=it.mode}}{{? it.message }}:{{?}}</b>{{? it.message }}{{=it.message}}{{?}}</b></p>
+<p><a href="/">Click here to return to the homepage.</a></p>
+{{#def.postbody}}

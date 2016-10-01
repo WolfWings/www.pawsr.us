@@ -1,4 +1,4 @@
-{{=it.boilerplate.pretitle}}
+{{#def.pretitle}}
 <title>{{=it.title}}</title>
 <style type="text/css">
 .content {
@@ -31,7 +31,7 @@
 	margin-left: -50px;
 	top: 50%;
 	left: 50%;
-	background: #000;
+	background: {{? it.background }}{{=it.background}}{{??}}#000{{?}};
 }
 .ring {
 	border-radius: 100%;
@@ -125,7 +125,7 @@ function update() {
 }
 update();
 </script>
-{{=it.boilerplate.prebody}}
+{{#def.prebody}}
 <div class="loader">
 <div class="ring level0"></div>
 <div class="ring level1"></div>
@@ -134,4 +134,4 @@ update();
 <div class="ring level4"></div>
 <div class="ring level5"></div>
 </div>
-{{=it.boilerplate.postbody}}
+{{#def.postbody}}

@@ -3,7 +3,6 @@ const crypto = require('crypto');
 const querystring = require('querystring');
 const _url = require('url');
 const keyvalue = require('./keyvalue.js');
-const templating = require('./templating.js');
 const nonce = require('./nonce.js');
 
 function oauth1_signature(method, url, params, key, token, hash) {
@@ -144,9 +143,8 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 			}));
 		} else {
 			res.write(global.templates.loading({
-				title: serviceTitle + ' Pre-Login Authorizet - www.pawsr.us'
+				title: serviceTitle + ' Pre-Login Authorize - www.pawsr.us'
 			,	serviceTitle: serviceTitle
-			,	boilerplate: data.boilerplate
 			}));
 		}
 		return;
@@ -168,15 +166,11 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 			}));
 		} else {
 			res.saveSession(data.session);
-			res.write(data.boilerplate.pretitle);
-			res.write('<title>' + serviceTitle + ' Pre-Login Authorizer - www.pawsr.us</title>');
-			res.write(data.boilerplate.prebody);
-			res.write('<p><b>');
-			res.write(state.slice(0,1).toUpperCase());
-			res.write(state.slice(1).replace(/:/g, '! '));
-			res.write('</b></p>');
-			res.write('<p><a href=\x22/\x22>Click here to return to the homepage.</a></p>');
-			res.write(data.boilerplate.postbody);
+			res.write(global.templates.login_failure({
+				title: serviceTitle + ' Pre-Login Authorizer - www.pawsr.us'
+			,	mode: state.slice(0,1).toUpperCase() + state.slice(1).split(':')[0]
+			,	message: state.replace(/^[^:]+(:|$)/, '')
+			}));
 		}
 		return;
 	}
@@ -226,12 +220,11 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 		delete(data.session[service + '_token_secret']);
 
 		res.saveSession(data.session);
-		res.write(data.boilerplate.pretitle);
-		res.write('<title>' + serviceTitle + ' Login Callback - www.pawsr.us</title>');
-		res.write(data.boilerplate.prebody);
-		res.write('<p><b>Error:</b> ' + serviceTitle + ' did not successfully login.</p>');
-		res.write('<p><a href=\x22/\x22>Click here to go back to the homepage, and try again later.</a></p>');
-		res.write(data.boilerplate.postbody);
+		res.write(global.templates.login_failure({
+			title: serviceTitle + ' Login Callback - www.pawsr.us'
+		,	mode: 'Error'
+		,	message: serviceTitle + ' did not successfully login.'
+		}));
 		return;
 	}
 
