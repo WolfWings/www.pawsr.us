@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "dot": "^1.0.3",
+    "memcache-plus": "^0.2.9",
     "mysql2": "^1.1.0"
   },
   "devDependencies": {
