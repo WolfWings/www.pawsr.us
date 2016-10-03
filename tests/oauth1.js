@@ -38,11 +38,6 @@ const base_data = JSON.stringify({
 	}
 ,	session: {
 	}
-,	boilerplate: {
-		pretitle: ''
-	,	prebody: ''
-	,	postbody: ''
-	}
 ,	user_agent: ''
 });
 
