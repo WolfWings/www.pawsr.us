@@ -1,5 +1,3 @@
-const keyvalue = require('../utils/keyvalue.js');
-
 // This is a successful 'login' here
 // Goal: If user_id is set, that is where everything will be 'merged to'
 //
@@ -38,7 +36,7 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 			,	screen_name
 			]
 		).then(() => {
-			keyvalue.set(uuid, 'ready:' + user_id);
+			global.memcache.set(uuid, 'ready:' + user_id);
 			return undefined;
 		});
 
@@ -46,13 +44,13 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 
 	if (typeof unique_id === 'undefined') {
 		console.log('No unique ID!');
-		keyvalue.set(uuid, 'error:No unique ID returned from ' + service);
+		global.memcache.set(uuid, 'error:No unique ID returned from ' + service);
 		return;
 	}
 
 	if (typeof screen_name === 'undefined') {
 		console.log('No screen name!');
-		keyvalue.set(uuid, 'error:No screen name returned from ' + service);
+		global.memcache.set(uuid, 'error:No screen name returned from ' + service);
 		return;
 	}
 
@@ -136,6 +134,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 	}).catch(err => {
 		console.log('Database error!');
 		console.log(err);
-		keyvalue.set(uuid, 'error:Database error!');
+		global.memcache.set(uuid, 'error:Database error!');
 	});
 };

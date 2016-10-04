@@ -1,4 +1,3 @@
-const keyvalue = require('../utils/keyvalue.js');
 const templating = require('../utils/templating.js');
 
 module.exports = (endpoints) => {
@@ -20,23 +19,29 @@ return Promise.all(data.services.map((x) => {
 		if (typeof data.session[service + '_uuid'] !== 'string') {
 			resolve(null);
 		} else {
-			return Promise.resolve(keyvalue.get('login_' + service + '_' + data.session[service + '_uuid'])
-			).then(status => {
+			var keyname = 'login_' + service + '_' + data.session[service + '_uuid'];
+			resolve(global.memcache.get(keyname)
+			.then(status => {
 				if (status === 'wip') {
 					refresh = true;
-				} else if (status === null) {
-					delete data.session[service + '_uuid'];
-					updatesession = true;
-				} else if ((typeof status === 'string')
-				        && (status.startsWith('ready:'))) {
-					data.session.userid = parseInt(status.slice(6));
-					keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
-					delete data.session[service + '_uuid'];
-					updatesession = true;
-					status = null;
+					return Promise.resolve(status);
 				}
-				return Promise.resolve(status);
-			});
+
+				if ((typeof status !== 'string')
+				 || (!status.startsWith('ready:'))) {
+					delete data.session[service + '_uuid'];
+					updatesession = true;
+					return Promise.resolve(status);
+				}
+
+				data.session.userid = parseInt(status.slice(6));
+				delete data.session[service + '_uuid'];
+				updatesession = true;
+				return global.memcache.delete(keyname)
+				.then(deleted => {
+					return Promise.resolve(null);
+				});
+			}));
 		}
 	}).then(status => {
 		services.push({
@@ -46,8 +51,8 @@ return Promise.all(data.services.map((x) => {
 		});
 		return Promise.resolve(true);
 	});
-})).then(() => {
-
+})).then((r) => {
+	console.log(r);
 	if (updatesession) {
 		res.saveSession(data.session);
 	}

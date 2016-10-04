@@ -20,6 +20,11 @@ delete routes;
 global.database = require('./utils/database.js');
 
 //
+// Build the memcache connection at the central level
+//
+global.memcache = require('memcache-plus')(require('./secrets.js').memcache);
+
+//
 // Build the HTTP listener server
 //
 var server = http.createServer((raw, res) => {
@@ -119,6 +124,7 @@ var server = http.createServer((raw, res) => {
 	tempdata.query = parsedurl.query;
 	tempdata.session = session;
 	res.setHeader('Content-Type', 'text/html');
+	console.log(uri);
 	route.routine(tempdata, res).then(() => {
 		if (res.finished !== true) {
 			console.log('Unfinished URI route: ' + uri);
