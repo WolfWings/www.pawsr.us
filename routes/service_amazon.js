@@ -17,7 +17,7 @@ module.exports = (endpoints, shared_data) => {
 	endpoints.push({
 		uri: '/initlogin/' + service
 	,	routine: (data, res) => {
-			oauth.oauth2_initlogin(
+			return oauth.oauth2_initlogin(
 				data
 			,	res
 			,	service
@@ -31,7 +31,7 @@ module.exports = (endpoints, shared_data) => {
 	endpoints.push({
 		uri: '/login/' + service
 	,	routine: (data, res) => {
-			oauth.oauth2_login(
+			return oauth.oauth2_login(
 				data
 			,	res
 			,	serviceTitle

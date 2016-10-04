@@ -11,6 +11,7 @@ res.write(global.templates.homepage({
 ,	userid: data.session.userid
 }));
 res.end();
+return Promise.resolve();
 
 
 

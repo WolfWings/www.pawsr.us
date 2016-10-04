@@ -82,6 +82,7 @@ exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
 	request.write(querystring.stringify(params));
 	request.end();
 
+	return Promise.resolve();
 };
 
 exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
@@ -102,9 +103,10 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 			res.statusCode = 307;
 			res.saveSession(data.session);
 			res.setHeader('Location', '/initlogin/' + service);
-			res.end();
 		}
-		return;
+		res.end();
+
+		return Promise.resolve();
 	}
 
 	var uuid = data.session[service + '_uuid'];
@@ -127,9 +129,11 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 			res.saveSession(data.session);
 			res.statusCode = 307;
 			res.setHeader('Location', '/');
-			res.end();
 		}
-		return;
+
+		res.end();
+
+		return Promise.resolve();
 	}
 
 	// If still processing, just cycle around again in one second.
@@ -147,7 +151,10 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 			,	serviceTitle: serviceTitle
 			}));
 		}
-		return;
+
+		res.end();
+
+		return Promise.resolve();
 	}
 
 	// We no longer need the UUID record serverside, so purge it.
@@ -172,7 +179,10 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 			,	message: state.replace(/^[^:]+(:|$)/, '')
 			}));
 		}
-		return;
+
+		res.end();
+
+		return Promise.resolve();
 	}
 
 	// YAY, success! *partyfavors*
@@ -192,8 +202,11 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 		res.saveSession(data.session);
 		res.statusCode = 307;
 		res.setHeader('Location', loginURL + '?oauth_token=' + components[2] + '#');
-		res.end();
 	}
+
+	res.end();
+
+	return Promise.resolve();
 };
 
 exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id, screen_name) => {
@@ -225,7 +238,8 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 		,	mode: 'Error'
 		,	message: serviceTitle + ' did not successfully login.'
 		}));
-		return;
+
+		return Promise.resolve();
 	}
 
 	var token_secret = data.session[service + '_token_secret'];
@@ -296,4 +310,6 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 	});
 	request.write(querystring.stringify(params));
 	request.end();
+
+	return Promise.resolve();
 };

@@ -30,11 +30,20 @@ var server = http.createServer((raw, res) => {
 
 	var parsedurl = require('url').parse(raw.url, true, true);
 	var uri = parsedurl.pathname;
-	var route = endpoints.find(i => i.uri === uri);
+	var route;
 	var tempdata;
 
+	// endpoints.find breaks at times, TODO: Fix properly
+	for (var i = 0; i < endpoints.length; i++) {
+		if (endpoints[i].uri === uri) {
+			route = endpoints[i];
+			break;
+		}
+	}
+
 	// Early bail-out of invalid routes to avoid session decoding entirely
-	if (typeof(route) === 'undefined') {
+	if ((typeof(route) !== 'object')
+	 || (typeof(route.routine) !== 'function')) {
 		console.log('Unknown URI: ' + uri);
 		res.statusCode = 404;
 		res.end('<!doctype html><html><head><meta http-equiv=\x22refresh\x22 content=\x220; url=/\x22></head><body></body></html>', 'utf8');
@@ -106,16 +115,16 @@ var server = http.createServer((raw, res) => {
 		}
 	}
 
-	console.time(uri);
 	tempdata = JSON.parse(shared_data);
 	tempdata.query = parsedurl.query;
 	tempdata.session = session;
 	res.setHeader('Content-Type', 'text/html');
-	route.routine(tempdata, res);
-	if (res.finished !== true) {
-		res.end();
-	}
-	console.timeEnd(uri);
+	route.routine(tempdata, res).then(() => {
+		if (res.finished !== true) {
+			console.log('Unfinished URI route: ' + uri);
+			res.end();
+		}
+	});
 });
 
 // Send a proper 400 if the client is sending screwy requests

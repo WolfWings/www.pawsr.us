@@ -37,6 +37,8 @@ exports.oauth2_initlogin = (data, res, service, clientID, loginURL, scope) => {
 	,	state: uuid
 	}) + '#');
 	res.end();
+
+	return Promise.resolve();
 };
 
 exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p_url, u_p_id, u_p_name) => {
@@ -61,7 +63,8 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 		,	mode: 'Error'
 		,	message: serviceTitle + ' did not successfully login.'
 		}));
-		return;
+
+		return Promise.resolve();
 	}
 
 	var uuid = 'login_' + service + '_' + data.session[service + '_uuid'];
@@ -164,4 +167,6 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 	});
 	request.write(params);
 	request.end();
+
+	return Promise.resolve();
 };

@@ -57,6 +57,8 @@ res.write(global.templates.login({
 
 res.end();
 
+return Promise.resolve();
+
 
 
 		}

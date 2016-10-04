@@ -17,7 +17,7 @@ module.exports = (endpoints, shared_data) => {
 	endpoints.push({
 		uri: '/initlogin/' + service
 	,	routine: (data, res) => {
-			oauth.oauth1_initlogin(
+			return oauth.oauth1_initlogin(
 				data
 			,	res
 			,	serviceTitle
@@ -30,7 +30,7 @@ module.exports = (endpoints, shared_data) => {
 	endpoints.push({
 		uri: '/preauth/' + service
 	,	routine: (data, res) => {
-			oauth.oauth1_preauth(
+			return oauth.oauth1_preauth(
 				data
 			,	res
 			,	serviceTitle
@@ -43,7 +43,7 @@ module.exports = (endpoints, shared_data) => {
 	endpoints.push({
 		uri: '/ajax/preauth/' + service
 	,	routine: (data, res) => {
-			oauth.oauth1_preauth(
+			return oauth.oauth1_preauth(
 				data
 			,	res
 			,	serviceTitle
@@ -56,7 +56,7 @@ module.exports = (endpoints, shared_data) => {
 	endpoints.push({
 		uri: '/login/' + service
 	,	routine: (data, res) => {
-			oauth.oauth1_login(
+			return oauth.oauth1_login(
 				data
 			,	res
 			,	serviceTitle
