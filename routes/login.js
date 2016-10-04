@@ -52,7 +52,6 @@ return Promise.all(data.services.map((x) => {
 		return Promise.resolve(true);
 	});
 })).then((r) => {
-	console.log(r);
 	if (updatesession) {
 		res.saveSession(data.session);
 	}
@@ -60,7 +59,9 @@ return Promise.all(data.services.map((x) => {
 	res.write(global.templates.login({
 		title: 'Login - www.pawsr.us'
 	,	refresh: refresh
-	,	services: services
+	,	services: services.sort((a, b) => {
+			return a.name.localeCompare(b.name);
+		})
 	}));
 
 	res.end();
