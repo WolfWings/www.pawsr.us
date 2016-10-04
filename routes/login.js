@@ -13,51 +13,55 @@ var refresh = false;
 var updatesession = false;
 var services = [];
 
-data.services.forEach((x) => {
+return Promise.all(data.services.map((x) => {
 	var service = x.name.toLowerCase();
 
-	var status = null;
-	if (typeof data.session[service + '_uuid'] !== 'undefined') {
-		status = keyvalue.get('login_' + service + '_' + data.session[service + '_uuid']);
-
-		if (status === null) {
-			delete data.session[service + '_uuid'];
-			updatesession = true;
+	return new Promise((resolve, reject) => {
+		if (typeof data.session[service + '_uuid'] !== 'string') {
+			resolve(null);
+		} else {
+			return Promise.resolve(keyvalue.get('login_' + service + '_' + data.session[service + '_uuid'])
+			).then(status => {
+				if (status === 'wip') {
+					refresh = true;
+				} else if (status === null) {
+					delete data.session[service + '_uuid'];
+					updatesession = true;
+				} else if ((typeof status === 'string')
+				        && (status.startsWith('ready:'))) {
+					data.session.userid = parseInt(status.slice(6));
+					keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
+					delete data.session[service + '_uuid'];
+					updatesession = true;
+					status = null;
+				}
+				return Promise.resolve(status);
+			});
 		}
-	}
-
-	if (typeof status === 'string') {
-		if (status.startsWith('ready:')) {
-			data.session.userid = parseInt(status.slice(6));
-			keyvalue.delete('login_' + service + '_' + data.session[service + '_uuid']);
-			delete data.session[service + '_uuid'];
-			updatesession = true;
-			status = null;
-		} else if (status === 'wip') {
-			refresh = true;
-		}
-	}
-
-	services.push({
-		name: x.name
-	,	status: status === null ? undefined : status
-	,	login_url: x.login_url
+	}).then(status => {
+		services.push({
+			name: x.name
+		,	status: status === null ? undefined : status
+		,	login_url: x.login_url
+		});
+		return Promise.resolve(true);
 	});
+})).then(() => {
+
+	if (updatesession) {
+		res.saveSession(data.session);
+	}
+
+	res.write(global.templates.login({
+		title: 'Login - www.pawsr.us'
+	,	refresh: refresh
+	,	services: services
+	}));
+
+	res.end();
+
+	return Promise.resolve();
 });
-
-if (updatesession) {
-	res.saveSession(data.session);
-}
-
-res.write(global.templates.login({
-	title: 'Login - www.pawsr.us'
-,	refresh: refresh
-,	services: services
-}));
-
-res.end();
-
-return Promise.resolve();
 
 
 
