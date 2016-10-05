@@ -2,6 +2,7 @@ const https = require('https');
 const querystring = require('querystring');
 const _url = require('url');
 const nonce = require('./nonce.js');
+const memcache = require('memcache-plus')(require('../secrets.js').memcache);
 
 function get_property(object, property) {
 	var parts = property.split('.');
@@ -98,14 +99,14 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 		response.on('end', () => {
 			if (response.statusCode !== 200) {
 				console.log('oauth2_login(' + serviceTitle + ') Error - Access_token status code: ' + response.statusCode);
-				global.memcache.set(uuid, 'error:' + response.statusCode);
+				memcache.set(uuid, 'error:' + response.statusCode);
 				return;
 			}
 
 			var results = JSON.parse(buffer.toString('utf8'));
 			if (typeof results.access_token === 'undefined') {
 				console.log('oauth2_login(' + serviceTitle + ') Error - No access_token returned');
-				global.memcache.set(uuid, 'error:No access_token returned');
+				memcache.set(uuid, 'error:No access_token returned');
 				return;
 			}
 
@@ -132,7 +133,7 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 					if (response.statusCode !== 200) {
 						console.log('oauth2_login(' + serviceTitle + ') Error - Profile status code: ' + response.statusCode);
 						console.log(buffer.toString('utf8'));
-						global.memcache.set(uuid, 'error:' + response.statusCode);
+						memcache.set(uuid, 'error:' + response.statusCode);
 						return;
 					}
 
@@ -149,19 +150,19 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 			});
 			request.on('error', (e) => {
 				console.log('oauth2_login(' + serviceTitle + ') Error - Problem with profile request: ' + e.message);
-				global.memcache.set(uuid, 'error:' + serviceTitle + ' API request failure.');
+				memcache.set(uuid, 'error:' + serviceTitle + ' API request failure.');
 			});
 			request.end();
 		});
 	});
 	request.on('error', (e) => {
 		console.log('oauth2_login(' + serviceTitle + ') Error - Problem with access_token request: ' + e.message);
-		global.memcache.set(uuid, 'error:' + serviceTitle + ' API request failure.');
+		memcache.set(uuid, 'error:' + serviceTitle + ' API request failure.');
 	});
 	request.write(params);
 	request.end();
 
-	return global.memcache.set(uuid, 'wip').then(() => {
+	return memcache.set(uuid, 'wip').then(() => {
 		res.statusCode = 307;
 		res.saveSession(data.session);
 		res.setHeader('Location', '/login');

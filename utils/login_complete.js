@@ -1,3 +1,5 @@
+const memcache = require('memcache-plus')(require('../secrets.js').memcache);
+
 // This is a successful 'login' here
 // Goal: If user_id is set, that is where everything will be 'merged to'
 //
@@ -36,7 +38,7 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 			,	screen_name
 			]
 		).then(() => {
-			global.memcache.set(uuid, 'ready:' + user_id);
+			memcache.set(uuid, 'ready:' + user_id);
 			return undefined;
 		});
 
@@ -44,13 +46,13 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 
 	if (typeof unique_id === 'undefined') {
 		console.log('No unique ID!');
-		global.memcache.set(uuid, 'error:No unique ID returned from ' + service);
+		memcache.set(uuid, 'error:No unique ID returned from ' + service);
 		return;
 	}
 
 	if (typeof screen_name === 'undefined') {
 		console.log('No screen name!');
-		global.memcache.set(uuid, 'error:No screen name returned from ' + service);
+		memcache.set(uuid, 'error:No screen name returned from ' + service);
 		return;
 	}
 
@@ -134,6 +136,6 @@ module.exports = (user_id, service, uuid, unique_id, screen_name) => {
 	}).catch(err => {
 		console.log('Database error!');
 		console.log(err);
-		global.memcache.set(uuid, 'error:Database error!');
+		memcache.set(uuid, 'error:Database error!');
 	});
 };

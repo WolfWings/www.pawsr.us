@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const querystring = require('querystring');
 const _url = require('url');
 const nonce = require('./nonce.js');
+const memcache = require('memcache-plus')(require('../secrets.js').memcache);
 
 function oauth1_signature(method, url, params, key, token, hash) {
 	var ordered = '';
@@ -49,7 +50,7 @@ exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
 	var request = https.request(url, (response) => {
 		var buffer = Buffer.alloc(0);
 		if (response.statusCode !== 200) {
-			global.memcache.delete(service + '_uuid_' + uuid);
+			memcache.delete(service + '_uuid_' + uuid);
 			return;
 		}
 
@@ -68,17 +69,17 @@ exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
 			} catch (err) {
 				newvalue = 'error:' + serviceTitle + ' service failed to return a token. Please try again later.';
 			}
-			global.memcache.set(service + '_uuid_' + uuid, newvalue);
+			memcache.set(service + '_uuid_' + uuid, newvalue);
 		});
 	});
 	request.on('error', (e) => {
-		global.memcache.set(service + '_uuid_' + uuid, 'error:API request problem to ' + serviceTitle);
+		memcache.set(service + '_uuid_' + uuid, 'error:API request problem to ' + serviceTitle);
 		console.log(`Problem with request: ${e.message}`);
 	});
 	request.write(querystring.stringify(params));
 	request.end();
 
-	return global.memcache.set(service + '_uuid_' + uuid, 'wip').then(() => {
+	return memcache.set(service + '_uuid_' + uuid, 'wip').then(() => {
 		data.session[service + '_uuid'] = uuid;
 		res.statusCode = 307;
 		res.saveSession(data.session);
@@ -115,7 +116,7 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 
 	var uuid = data.session[service + '_uuid'];
 
-	return global.memcache.get(service + '_uuid_' + uuid)
+	return memcache.get(service + '_uuid_' + uuid)
 	.then(state => {
 		// If still processing, just cycle around again in one second.
 		// Calls usually take 500ms or less.
@@ -158,7 +159,7 @@ exports.oauth1_preauth = (data, res, serviceTitle, loginURL, ajax) => {
 
 		// We no longer need the UUID record serverside, so purge it.
 		// Note we do *NOT* update the client-side cookie yet, as we may need to add more data to it first.
-		global.memcache.delete(service + '_uuid_' + uuid);
+		memcache.delete(service + '_uuid_' + uuid);
 
 		// Not ready and not WIP? Usually an error, but generic response to future-proof.
 		if (!state.startsWith('ready:')) {
@@ -278,7 +279,7 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 		});
 		response.on('end', () => {
 			if (response.statusCode !== 200) {
-				global.memcache.set(uuid, 'error:' + response.statusCode);
+				memcache.set(uuid, 'error:' + response.statusCode);
 				return;
 			}
 
@@ -294,13 +295,13 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 		});
 	});
 	request.on('error', (e) => {
-		global.memcache.set(uuid, 'error:' + serviceTitle + ' API request failure.');
+		memcache.set(uuid, 'error:' + serviceTitle + ' API request failure.');
 		console.log(`Problem with request: ${e.message}`);
 	});
 	request.write(querystring.stringify(params));
 	request.end();
 
-	return global.memcache.set(uuid, 'wip')
+	return memcache.set(uuid, 'wip')
 	.then(() => {
 		console.log('Redirecting WIP login back to /login');
 		delete(data.session[service + '_token']);

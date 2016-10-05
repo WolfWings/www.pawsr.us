@@ -20,11 +20,6 @@ delete routes;
 global.database = require('./utils/database.js');
 
 //
-// Build the memcache connection at the central level
-//
-global.memcache = require('memcache-plus')(require('./secrets.js').memcache);
-
-//
 // Build the HTTP listener server
 //
 var server = http.createServer((raw, res) => {

@@ -1,4 +1,4 @@
-const templating = require('../utils/templating.js');
+const memcache = require('memcache-plus')(require('../secrets.js').memcache);
 
 module.exports = (endpoints) => {
 	console.log('Registering /login');
@@ -20,7 +20,7 @@ return Promise.all(data.services.map((x) => {
 			resolve(null);
 		} else {
 			var keyname = 'login_' + service + '_' + data.session[service + '_uuid'];
-			resolve(global.memcache.get(keyname)
+			resolve(memcache.get(keyname)
 			.then(status => {
 				if (status === 'wip') {
 					refresh = true;
@@ -37,7 +37,7 @@ return Promise.all(data.services.map((x) => {
 				data.session.userid = parseInt(status.slice(6));
 				delete data.session[service + '_uuid'];
 				updatesession = true;
-				return global.memcache.delete(keyname)
+				return memcache.delete(keyname)
 				.then(deleted => {
 					return Promise.resolve(null);
 				});

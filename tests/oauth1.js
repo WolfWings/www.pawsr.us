@@ -1,3 +1,5 @@
+const memcache = require('memcache-plus')(require('../secrets.js').memcache);
+
 // Allow this test to be called standalone
 if (typeof global.database === 'undefined') {
 	global.database = {};
@@ -97,7 +99,7 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with uuid: wip');
 
-	global.memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
+	memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
 		data = JSON.parse(base_data);
 		data.session = {};
 		data.session['_test_oauth1_uuid'] = '1';
@@ -106,7 +108,7 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with uuid: wip via ajax');
 
-	global.memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
+	memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
 		data = JSON.parse(base_data);
 		data.session = {};
 		data.session['_test_oauth1_uuid'] = '1';
@@ -115,7 +117,7 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with uuid: error:_');
 
-	global.memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
+	memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
 		data = JSON.parse(base_data);
 		data.session = {};
 		data.session['_test_oauth1_uuid'] = '2';
@@ -124,7 +126,7 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with uuid: error:_ via ajax');
 
-	global.memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
+	memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
 		data = JSON.parse(base_data);
 		data.session = {};
 		data.session['_test_oauth1_uuid'] = '2';
@@ -133,7 +135,7 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with uuid: ready:5:6');
 
-	global.memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
+	memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
 		data = JSON.parse(base_data);
 		data.session = {};
 		data.session['_test_oauth1_uuid'] = '4';
@@ -142,7 +144,7 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with uuid: ready:5:6 via ajax');
 
-	global.memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
+	memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
 		data = JSON.parse(base_data);
 		data.session = {};
 		data.session['_test_oauth1_uuid'] = '4';
