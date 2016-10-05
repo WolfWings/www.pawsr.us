@@ -19,9 +19,6 @@ return Promise.resolve();
 
 
 		}
-	,	test_code_coverage: (routine, res) => {
-			routine({}, res);
-		}
 	});
 
 	endpoints.push({
@@ -38,9 +35,6 @@ return Promise.resolve();
 
 
 		}
-	,	test_code_coverage: (routine, res) => {
-			routine({}, res);
-		}
 	});
 
 	endpoints.push({
@@ -56,9 +50,6 @@ return Promise.resolve();
 
 
 
-		}
-	,	test_code_coverage: (routine, res) => {
-			routine({}, res);
 		}
 	});
 };

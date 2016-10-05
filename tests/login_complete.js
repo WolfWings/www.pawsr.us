@@ -1,4 +1,3 @@
-const keyvalue = require('../utils/keyvalue.js');
 const login_complete = require('../utils/login_complete.js');
 
 var users = {};
@@ -45,14 +44,14 @@ function do_tests(step) {
 	var uuid = '' + step;
 	switch (step) {
 		case 0:
-			console.log('Invalid user...');
-			login_complete(undefined, 'Twitter', uuid, undefined, 'TestAccount' + step);
+			console.log('Invalid ID...');
+			login_complete(undefined, 'Twitter', uuid, '_test_0_test_', undefined);
 			keyvalue.set(uuid, 'ready:-1');
 			waitHelper(uuid, step + 1);
 			break;
 		case 1:
-			console.log('Invalid ID...');
-			login_complete(undefined, 'Twitter', uuid, '_test_1_test_', undefined);
+			console.log('Invalid user...');
+			login_complete(undefined, 'Twitter', uuid, undefined, 'TestAccount' + step);
 			keyvalue.set(uuid, 'ready:-1');
 			waitHelper(uuid, step + 1);
 			break;

@@ -14,7 +14,6 @@ if (typeof global.templates.login_failure === 'undefined') {
 
 const oauth = require('../utils/oauth1.js');
 const https = require('https');
-const keyvalue = require('../utils/keyvalue.js');
 const querystring = require('querystring');
 
 // Disable certificate checking as we're using a self-signed localhost cert
@@ -98,51 +97,57 @@ function do_tests(port) {
 
 	console.log('Testing OAuth 1.0a pre-auth with keyvalue: wip');
 
-	data = JSON.parse(base_data);
-	data.session = {};
-	data.session['_test_oauth1_uuid'] = '1';
-	keyvalue.set('_test_oauth1_uuid_1', 'wip');
-	oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+	global.memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
+		data = JSON.parse(base_data);
+		data.session = {};
+		data.session['_test_oauth1_uuid'] = '1';
+		oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+	});
 
 	console.log('Testing OAuth 1.0a pre-auth with keyvalue: wip via ajax');
 
-	data = JSON.parse(base_data);
-	data.session = {};
-	data.session['_test_oauth1_uuid'] = '1';
-	keyvalue.set('_test_oauth1_uuid_1', 'wip');
-	oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
+	global.memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
+		data = JSON.parse(base_data);
+		data.session = {};
+		data.session['_test_oauth1_uuid'] = '1';
+		oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
+	});
 
 	console.log('Testing OAuth 1.0a pre-auth with keyvalue: error:_');
 
-	data = JSON.parse(base_data);
-	data.session = {};
-	data.session['_test_oauth1_uuid'] = '2';
-	keyvalue.set('_test_oauth1_uuid_2', 'error:_');
-	oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+	global.memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
+		data = JSON.parse(base_data);
+		data.session = {};
+		data.session['_test_oauth1_uuid'] = '2';
+		oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+	});
 
 	console.log('Testing OAuth 1.0a pre-auth with keyvalue: error:_ via ajax');
 
-	data = JSON.parse(base_data);
-	data.session = {};
-	data.session['_test_oauth1_uuid'] = '2';
-	keyvalue.set('_test_oauth1_uuid_2', 'error:_');
-	oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
+	global.memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
+		data = JSON.parse(base_data);
+		data.session = {};
+		data.session['_test_oauth1_uuid'] = '2';
+		oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
+	});
 
 	console.log('Testing OAuth 1.0a pre-auth with keyvalue: ready:5:6');
 
-	data = JSON.parse(base_data);
-	data.session = {};
-	data.session['_test_oauth1_uuid'] = '4';
-	keyvalue.set('_test_oauth1_uuid_4', 'ready:5:6');
-	oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+	global.memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
+		data = JSON.parse(base_data);
+		data.session = {};
+		data.session['_test_oauth1_uuid'] = '4';
+		oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
+	});
 
 	console.log('Testing OAuth 1.0a pre-auth with keyvalue: ready:5:6 via ajax');
 
-	data = JSON.parse(base_data);
-	data.session = {};
-	data.session['_test_oauth1_uuid'] = '4';
-	keyvalue.set('_test_oauth1_uuid_4', 'ready:5:6');
-	oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
+	global.memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
+		data = JSON.parse(base_data);
+		data.session = {};
+		data.session['_test_oauth1_uuid'] = '4';
+		oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
+	});
 
 	console.log('Testing OAuth 1.0a post-auth with empty data');
 

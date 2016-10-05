@@ -72,47 +72,5 @@ return Promise.all(data.services.map((x) => {
 
 
 		}
-	,	test_code_coverage: (routine, res, raw_data) => {
-			var data;
-			data = JSON.parse(raw_data);
-			data.session = {};
-			console.log('Testing /login with empty session');
-			routine(data, res);
-
-			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '0'
-			};
-			keyvalue.delete('login_twitter_0');
-			console.log('Testing /login with invalid twitter uuid');
-			routine(data, res);
-
-			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '1'
-			};
-			keyvalue.set('login_twitter_1', 'wip');
-			console.log('Testing /login with twitter uuid: wip');
-			routine(data, res);
-			keyvalue.delete('login_twitter_1');
-
-			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '2'
-			};
-			keyvalue.set('login_twitter_2', 'error:Testing');
-			console.log('Testing /login with twitter uuid: error');
-			routine(data, res);
-			keyvalue.delete('login_twitter_2');
-
-			data = JSON.parse(raw_data);
-			data.session = {
-				twitter_uuid: '3'
-			};
-			keyvalue.set('login_twitter_3', 'ready:0');
-			console.log('Testing /login with twitter uuid: ready');
-			routine(data, res);
-			keyvalue.delete('login_twitter_3');
-		}
 	});
 }
