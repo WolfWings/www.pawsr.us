@@ -81,21 +81,21 @@ function do_tests(port) {
 	data.session = {};
 	oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
 
-	console.log('Testing OAuth 1.0a pre-auth with missing keyvalue');
+	console.log('Testing OAuth 1.0a pre-auth with missing uuid');
 
 	data = JSON.parse(base_data);
 	data.session = {};
 	data.session['_test_oauth1_uuid'] = '0';
 	oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
 
-	console.log('Testing OAuth 1.0a pre-auth with missing keyvalue via ajax');
+	console.log('Testing OAuth 1.0a pre-auth with missing uuid via ajax');
 
 	data = JSON.parse(base_data);
 	data.session = {};
 	data.session['_test_oauth1_uuid'] = '0';
 	oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
 
-	console.log('Testing OAuth 1.0a pre-auth with keyvalue: wip');
+	console.log('Testing OAuth 1.0a pre-auth with uuid: wip');
 
 	global.memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
 		data = JSON.parse(base_data);
@@ -104,7 +104,7 @@ function do_tests(port) {
 		oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
 	});
 
-	console.log('Testing OAuth 1.0a pre-auth with keyvalue: wip via ajax');
+	console.log('Testing OAuth 1.0a pre-auth with uuid: wip via ajax');
 
 	global.memcache.set('_test_oauth1_uuid_1', 'wip').then(() => {
 		data = JSON.parse(base_data);
@@ -113,7 +113,7 @@ function do_tests(port) {
 		oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
 	});
 
-	console.log('Testing OAuth 1.0a pre-auth with keyvalue: error:_');
+	console.log('Testing OAuth 1.0a pre-auth with uuid: error:_');
 
 	global.memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
 		data = JSON.parse(base_data);
@@ -122,7 +122,7 @@ function do_tests(port) {
 		oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
 	});
 
-	console.log('Testing OAuth 1.0a pre-auth with keyvalue: error:_ via ajax');
+	console.log('Testing OAuth 1.0a pre-auth with uuid: error:_ via ajax');
 
 	global.memcache.set('_test_oauth1_uuid_2', 'error:_').then(() => {
 		data = JSON.parse(base_data);
@@ -131,7 +131,7 @@ function do_tests(port) {
 		oauth.oauth1_preauth(data, fake_res, '_test_oauth1', undefined, true);
 	});
 
-	console.log('Testing OAuth 1.0a pre-auth with keyvalue: ready:5:6');
+	console.log('Testing OAuth 1.0a pre-auth with uuid: ready:5:6');
 
 	global.memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
 		data = JSON.parse(base_data);
@@ -140,7 +140,7 @@ function do_tests(port) {
 		oauth.oauth1_preauth(data, fake_res, '_test_oauth1');
 	});
 
-	console.log('Testing OAuth 1.0a pre-auth with keyvalue: ready:5:6 via ajax');
+	console.log('Testing OAuth 1.0a pre-auth with uuid: ready:5:6 via ajax');
 
 	global.memcache.set('_test_oauth1_uuid_4', 'ready:5:6').then(() => {
 		data = JSON.parse(base_data);
