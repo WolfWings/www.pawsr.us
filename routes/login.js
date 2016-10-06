@@ -18,31 +18,34 @@ return Promise.all(data.services.map((x) => {
 	return new Promise((resolve, reject) => {
 		if (typeof data.session[service + '_uuid'] !== 'string') {
 			resolve(null);
-		} else {
-			var keyname = 'login_' + service + '_' + data.session[service + '_uuid'];
-			resolve(memcache.get(keyname)
-			.then(status => {
-				if (status === 'wip') {
-					refresh = true;
-					return Promise.resolve(status);
-				}
+			return;
+		}
 
-				if ((typeof status !== 'string')
-				 || (!status.startsWith('ready:'))) {
-					delete data.session[service + '_uuid'];
-					updatesession = true;
-					return Promise.resolve(status);
-				}
+		var keyname = 'login_' + service + '_' + data.session[service + '_uuid'];
+		resolve(memcache.get(keyname)
+		.then(status => {
+			if (status === 'wip') {
+				refresh = true;
+				return Promise.resolve(status);
+			}
 
-				data.session.userid = parseInt(status.slice(6));
+			if ((typeof status !== 'string')
+			 || (!status.startsWith('ready:'))) {
 				delete data.session[service + '_uuid'];
 				updatesession = true;
-				return memcache.delete(keyname)
-				.then(deleted => {
-					return Promise.resolve(null);
-				});
-			}));
-		}
+				return Promise.resolve(status);
+			}
+
+			data.session.userid = parseInt(status.slice(6));
+			delete data.session[service + '_uuid'];
+			updatesession = true;
+			return memcache.delete(keyname)
+			.then(deleted => {
+				return Promise.resolve(null);
+			});
+		})).catch(reason => {
+			reject(reason);
+		});
 	}).then(status => {
 		services.push({
 			name: x.name

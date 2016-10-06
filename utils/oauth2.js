@@ -1,6 +1,6 @@
 const https = require('https');
 const querystring = require('querystring');
-const _url = require('url');
+const urlparser = require('url');
 const nonce = require('./nonce.js');
 const memcache = require('memcache-plus')(require('../secrets.js').memcache);
 
@@ -77,7 +77,7 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 	,	redirect_uri:		'https:\x2F/www.pawsr.us/login/' + service
 	}, '&', '=', {encodeURIComponent: x => x});
 
-	var url = _url.parse(a_t_url, false, true);
+	var url = urlparser.parse(a_t_url, false, true);
 	url.method = 'POST';
 	url.agent = false;
 	if (a_t_auth !== null) {
@@ -110,7 +110,7 @@ exports.oauth2_login = (data, res, serviceTitle, secrets, a_t_url, a_t_auth, u_p
 				return;
 			}
 
-			url = _url.parse(u_p_url + '?' + querystring.stringify({
+			url = urlparser.parse(u_p_url + '?' + querystring.stringify({
 				access_token:	results.access_token
 //			,	client_id:	secrets.clientID
 //			,	client_secret:	secrets.clientSecret

@@ -1,7 +1,7 @@
 const https = require('https');
 const crypto = require('crypto');
 const querystring = require('querystring');
-const _url = require('url');
+const urlparser = require('url');
 const nonce = require('./nonce.js');
 const memcache = require('memcache-plus')(require('../secrets.js').memcache);
 
@@ -12,7 +12,7 @@ function oauth1_signature(method, url, params, key, token, hash) {
 	});
 	var hmac = crypto.createHmac(hash, key + '&' + token);
 	hmac.update(method + '&' + querystring.escape(url) + '&' + querystring.escape(ordered.slice(1)));
-	return '\x22' + querystring.escape(hmac.digest('base64')) + '\x22';
+	return 'OAuth oauth_signature=\x22' + querystring.escape(hmac.digest('base64')) + '\x22';
 };
 
 exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
@@ -28,21 +28,20 @@ exports.oauth1_initlogin = (data, res, serviceTitle, secrets, tokenURL) => {
 	,	oauth_version:          '1.0'
 	};
 
-	var authorization = 'OAuth oauth_signature=' + oauth1_signature(
-		'POST'
-	,	tokenURL
-	,	params
-	,	secrets.secretKey
-	,	''
-	,	'sha1'
-	);
 
-	var url = _url.parse(tokenURL, false, true);
+	var url = urlparser.parse(tokenURL, false, true);
 	url.method = 'POST';
 	url.agent = false;
 	url.headers = {
 		'Accept': '*\x2F*'
-	,	'Authorization': authorization
+	,	'Authorization': oauth1_signature(
+			'POST'
+		,	tokenURL
+		,	params
+		,	secrets.secretKey
+		,	''
+		,	'sha1'
+		)
 	,	'Content-Type': 'application/x-www-form-urlencoded'
 	,	'User-Agent': data.user_agent
 	};
@@ -253,20 +252,19 @@ exports.oauth1_login = (data, res, serviceTitle, secrets, profileURL, unique_id,
 	,	oauth_verifier:         data.query.oauth_verifier
 	};
 
-	var authorization = 'OAuth oauth_signature=' + oauth1_signature(
-		'POST'
-	,	profileURL
-	,	params
-	,	secrets.secretKey
-	,	token_secret
-	,	'sha1');
-
-	url = _url.parse(profileURL);
+	var url = urlparser.parse(profileURL);
 	url.method = 'POST';
 	url.agent = false;
 	url.headers = {
 		'Accept': '*\x2F*'
-	,	'Authorization': authorization
+	,	'Authorization': oauth1_signature(
+			'POST'
+		,	profileURL
+		,	params
+		,	secrets.secretKey
+		,	token_secret
+		,	'sha1'
+		)
 	,	'Content-Type': 'application/x-www-form-urlencoded'
 	,	'User-Agent': data.user_agent
 	};
