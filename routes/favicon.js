@@ -11,10 +11,12 @@ module.exports = (endpoints, shared_data) => {
 
 
 
-res.setHeader('Content-Type', 'image/x-icon');
-res.write(ico);
-res.end();
-return Promise.resolve();
+return new Promise(resolve => {
+	res.setHeader('Content-Type', 'image/x-icon');
+	res.write(ico);
+	res.end();
+	resolve();
+});
 
 
 
@@ -27,10 +29,12 @@ return Promise.resolve();
 
 
 
-res.setHeader('Content-Type', 'image/png');
-res.write(png);
-res.end();
-return Promise.resolve();
+return new Promise(resolve => {
+	res.setHeader('Content-Type', 'image/png');
+	res.write(png);
+	res.end();
+	resolve();
+});
 
 
 
@@ -43,10 +47,12 @@ return Promise.resolve();
 
 
 
-res.setHeader('Content-Type', 'image/png');
-res.write(apple);
-res.end();
-return Promise.resolve();
+return new Promise(resolve => {
+	res.setHeader('Content-Type', 'image/png');
+	res.write(apple);
+	res.end();
+	resolve();
+});
 
 
 

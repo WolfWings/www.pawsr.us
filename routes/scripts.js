@@ -9,10 +9,12 @@ module.exports = (endpoints, shared_data) => {
 
 
 
-res.setHeader('Content-Type', 'application/javascript');
-res.write(svg4e);
-res.end();
-return Promise.resolve();
+return new Promise(resolve => {
+	res.setHeader('Content-Type', 'application/javascript');
+	res.write(svg4e);
+	res.end();
+	resolve();
+});
 
 
 

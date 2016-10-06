@@ -6,12 +6,14 @@ module.exports = (endpoints, shared_data) => {
 
 
 
-res.write(global.templates.homepage({
-	title: 'www.pawsr.us'
-,	userid: data.session.userid
-}));
-res.end();
-return Promise.resolve();
+return new Promise(resolve => {
+	res.write(global.templates.homepage({
+		title: 'www.pawsr.us'
+	,	userid: data.session.userid
+	}));
+	res.end();
+	resolve();
+});
 
 
 
