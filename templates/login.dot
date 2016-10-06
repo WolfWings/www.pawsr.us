@@ -22,4 +22,5 @@
 </li>
 {{~}}
 </ul>
+<script async src="/svg4everybody.js" onload="svg4everybody()"></script>
 {{#def.postbody}}
