@@ -1,0 +1,4 @@
+{{#def.pretitle}}
+<title>{{=it.title}}</title>
+{{#def.prebody}}
+{{#def.postbody}}
