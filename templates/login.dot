@@ -1,7 +1,9 @@
 {{#def.pretitle}}
 <title>{{=it.title}}</title>
 {{? it.refresh }}
+<script>document.write("<script>/*");</script>
 <meta http-equiv="refresh" content="1">
+<script>/**/</script>
 {{?}}
 {{#def.prebody}}
 <p>Add/Verify Login</p>

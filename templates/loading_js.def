@@ -1,0 +1,30 @@
+<script>
+function error() {
+	document.location.reload(true);
+}
+
+function update() {
+	var request = new XMLHttpRequest();
+	request.open('GET', '/ajax' + window.location.pathname, true);
+	request.onerror = error;
+	request.onload = function() {
+		if (request.status === 200) {
+			var data = JSON.parse(request.responseText);
+			switch (data.command) {
+				case 'wait':
+					setTimeout(update, 1000);
+					break;
+				case 'redirect':
+					document.location.assign(data.location);
+					break;
+				default:
+					error();
+			}
+		} else {
+			error();
+		}
+	};
+	request.send();
+}
+update();
+</script>

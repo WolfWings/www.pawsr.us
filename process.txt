@@ -32,8 +32,11 @@ Global URL structure:
 		If 'ready' it sets/updates the 'userid' session
 		state, I.E. the server-side login state/user.
 
-/profile
+/profiles
 	TODO: Handle creating/managing public contact URLs
+
+/edit_profile
+	TODO: The 'editing' page for a specific public profile
 
 
 
